@@ -24,5 +24,8 @@ public class SettingPopup : MonoBehaviour
     public void TogglePopup()
     {
         if (popupPanel != null) popupPanel.SetActive(!popupPanel.activeSelf);
+
+        if (popupPanel.activeSelf) Time.timeScale = 0;
+        if (!popupPanel.activeSelf) Time.timeScale = 1;
     }
 }

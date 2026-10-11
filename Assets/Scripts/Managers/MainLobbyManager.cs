@@ -1,19 +1,19 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class MainLobbyManager : MonoBehaviour
 {
     [Header("통합 최고점수 UI")]
-    public Text grandBestScoreText;
-    public Text grandBestInitialText;
+    public TextMeshProUGUI grandBestScoreText;
+    public TextMeshProUGUI grandBestInitialText;
 
     [Header("각 게임 1~3위 롤링 UI")]
-    public Text currentGameTitleText;
-    public Text rank1Text;
-    public Text rank2Text;
-    public Text rank3Text;
+    public TextMeshProUGUI currentGameTitleText;
+    public TextMeshProUGUI rank1Text;
+    public TextMeshProUGUI rank2Text;
+    public TextMeshProUGUI rank3Text;
 
     private string[] gameIds = { "0", "1", "2" };
     private string[] gameTitles = { "카드 짝맞추기", "스피드 분리수거", "후르츠 슬라이스" };
@@ -66,9 +66,14 @@ public class MainLobbyManager : MonoBehaviour
         if (lb == null) return;
 
         ScoreEntry[] list = lb.GetListByGameId(id);
-        if (rank1Text != null) rank1Text.text = (list != null && list.Length > 0) ? $"1st  {list[0].name}  {list[0].score}" : "1st  ---  0";
-        if (rank2Text != null) rank2Text.text = (list != null && list.Length > 1) ? $"2nd  {list[1].name}  {list[1].score}" : "2nd  ---  0";
-        if (rank3Text != null) rank3Text.text = (list != null && list.Length > 2) ? $"3rd  {list[2].name}  {list[2].score}" : "3rd  ---  0";
+        if (rank1Text != null)
+            rank1Text.text = (list != null && list.Length > 0) ? $"{list[0].score}\n{list[0].name}" : "0\n---";
+
+        if (rank2Text != null)
+            rank2Text.text = (list != null && list.Length > 1) ? $"{list[1].score}\n{list[1].name}" : "0\n---";
+
+        if (rank3Text != null)
+            rank3Text.text = (list != null && list.Length > 2) ? $"{list[2].score}\n{list[2].name}" : "0\n---";
     }
 
     public void OnClickStart()

@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public enum GameType { TimeLimit, LifeLimit }
 
@@ -24,32 +25,33 @@ public class GameStateManager : MonoBehaviour
 
     [Header("카운트다운 & 게임오버 UI")]
     public GameObject countdownPanel;
-    public Text countdownText;
+    public TextMeshProUGUI countdownText;
     public GameObject gameOverPanel;
 
-    [Header("스코어 패널 (3종 화면)")]
+    [Header("스코어 패널 루트")]
     public GameObject scorePanel;
-    public GameObject screenNormal;
-    public GameObject screenPersonalBest;
-    public GameObject screenHallOfFame;
 
-    [Header("스코어 텍스트 UI")]
-    public Text normalCurrentScoreText;
-    public Text normalBestScoreText;
-    public Text personalBestScoreText;
-    public Text hallOfFameScoreText;
+    [Header("일반점수화면 (일반 & 개인최고 공용)")]
+    public GameObject panelNormal;
+    public TextMeshProUGUI normalBestScoreText;
+    public TextMeshProUGUI normalCurrentScoreText;
+    public Button normalRestartButton;
+    public Button normalHomeButton;
 
-    [Header("명예의 전당 룰렛 UI")]
-    public Text[] slotTexts = new Text[3];
+    [Header("랭킹점수화면 (명예의 전당)")]
+    public GameObject panelHallOfFame;
+    public TextMeshProUGUI hallOfFameCurrentScoreText;
+    public TextMeshProUGUI[] slotTexts = new TextMeshProUGUI[3];
     private int[] slotIndices = { 0, 0, 0 };
+    public Button[] slotUpButtons = new Button[3];
+    public Button[] slotDownButtons = new Button[3];
     public Button submitButton;
+    public Button hallOfFameRestartButton;
+    public Button hallOfFameHomeButton;
 
-    [Header("갱신 리더보드 & 네비 버튼")]
-    public GameObject leaderboardGroup;
-    public Text rank1Text;
-    public Text rank2Text;
-    public Text rank3Text;
-    public GameObject navButtonsGroup;
+    // 폰트 색상 정의 (남색: #2D324D / 노란색: #FEC90D)
+    private readonly Color colorNormal = new Color32(0x2D, 0x32, 0x4D, 0xFF);
+    private readonly Color colorBest = new Color32(0xFE, 0xC9, 0x0D, 0xFF);
 
     private void Awake() { Instance = this; }
 
@@ -99,12 +101,14 @@ public class GameStateManager : MonoBehaviour
     {
         if (isGameOver) return;
         currentScore = Mathf.Max(0, currentScore + amount);
+        UIManager.Instance.UpdateScoreUI();
     }
 
     public void ReduceLife(int amount = 1)
     {
         if (isGameOver) return;
         currentLife -= amount;
+        UIManager.Instance.UpdateLifeUI();
     }
 
     public void TriggerGameOver()
@@ -131,36 +135,58 @@ public class GameStateManager : MonoBehaviour
         int localBest = PlayerPrefs.GetInt($"BestScore{gameIndex}", 0);
         int rank3Cutoff = NetworkManager.Instance != null ? NetworkManager.Instance.GetCutoffScore(gameIndex.ToString()) : 0;
 
-        screenNormal.SetActive(false);
-        screenPersonalBest.SetActive(false);
-        screenHallOfFame.SetActive(false);
-        if (leaderboardGroup != null) leaderboardGroup.SetActive(false);
-        if (navButtonsGroup != null) navButtonsGroup.SetActive(false);
+        if (panelNormal != null) panelNormal.SetActive(false);
+        if (panelHallOfFame != null) panelHallOfFame.SetActive(false);
 
-        if (currentScore > localBest)
+        // TOP 3 랭킹 달성 여부 체크
+        if (currentScore > rank3Cutoff)
         {
-            PlayerPrefs.SetInt($"BestScore{gameIndex}", currentScore);
-            PlayerPrefs.Save();
+            // 1. 랭킹점수화면 (명예의 전당 패널)
+            if (panelHallOfFame != null) panelHallOfFame.SetActive(true);
 
-            if (currentScore > rank3Cutoff)
+            if (hallOfFameCurrentScoreText != null)
+                hallOfFameCurrentScoreText.text = $"{currentScore}";
+
+            // 초기 버튼 활성화/비활성화 처리
+            SetHallOfFameInteractable(true);
+
+            // 로컬 최고점수 갱신
+            if (currentScore > localBest)
             {
-                screenHallOfFame.SetActive(true);
-                if (hallOfFameScoreText != null) hallOfFameScoreText.text = $"TOP 3 진입!\n{currentScore}점!";
-                UpdateSlotUI();
+                PlayerPrefs.SetInt($"BestScore{gameIndex}", currentScore);
+                PlayerPrefs.Save();
             }
-            else
-            {
-                screenPersonalBest.SetActive(true);
-                if (personalBestScoreText != null) personalBestScoreText.text = $"새로운 최고 기록!\n{currentScore}점!";
-                if (navButtonsGroup != null) navButtonsGroup.SetActive(true);
-            }
+
+            UpdateSlotUI();
         }
         else
         {
-            screenNormal.SetActive(true);
-            if (normalCurrentScoreText != null) normalCurrentScoreText.text = $"이번 점수: {currentScore}점";
-            if (normalBestScoreText != null) normalBestScoreText.text = $"내 최고 기록: {localBest}점";
-            if (navButtonsGroup != null) navButtonsGroup.SetActive(true);
+            // 2. 일반점수화면 (일반 또는 개인최고 패널)
+            if (panelNormal != null) panelNormal.SetActive(true);
+
+            bool isNewBest = currentScore > localBest;
+
+            if (isNewBest)
+            {
+                PlayerPrefs.SetInt($"BestScore{gameIndex}", currentScore);
+                PlayerPrefs.Save();
+                localBest = currentScore;
+            }
+
+            // 색상 결정 (개인 최고 달성시 노란색, 기본은 남색)
+            Color targetColor = isNewBest ? colorBest : colorNormal;
+
+            if (normalBestScoreText != null)
+            {
+                normalBestScoreText.text = $"Best : {localBest}";
+                normalBestScoreText.color = targetColor;
+            }
+
+            if (normalCurrentScoreText != null)
+            {
+                normalCurrentScoreText.text = $"{currentScore}";
+                normalCurrentScoreText.color = targetColor;
+            }
         }
     }
 
@@ -181,26 +207,30 @@ public class GameStateManager : MonoBehaviour
 
     public void OnClickSubmit()
     {
-        if (submitButton != null) submitButton.interactable = false;
+        // 제출 시 룰렛 조작 버튼과 저장 버튼 비활성화, 재시작/처음으로 버튼 활성화
+        SetHallOfFameInteractable(false);
+
         string initial = $"{slotTexts[0].text}{slotTexts[1].text}{slotTexts[2].text}";
 
         StartCoroutine(NetworkManager.Instance.PostScore(gameIndex.ToString(), initial, currentScore, (success) => {
-            screenHallOfFame.SetActive(false);
-            ShowUpdatedLeaderboard();
+            // 필요 시 서버 전송 완료 후 동작
         }));
     }
 
-    private void ShowUpdatedLeaderboard()
+    private void SetHallOfFameInteractable(bool isEnteringInitial)
     {
-        if (leaderboardGroup != null) leaderboardGroup.SetActive(true);
-        if (navButtonsGroup != null) navButtonsGroup.SetActive(true);
+        // 이니셜 입력 관련 버튼 상태 변경
+        if (submitButton != null) submitButton.interactable = isEnteringInitial;
 
-        var lb = NetworkManager.Instance.cachedLeaderboard;
-        ScoreEntry[] list = lb.GetListByGameId(gameIndex.ToString());
+        for (int i = 0; i < 3; i++)
+        {
+            if (slotUpButtons[i] != null) slotUpButtons[i].interactable = isEnteringInitial;
+            if (slotDownButtons[i] != null) slotDownButtons[i].interactable = isEnteringInitial;
+        }
 
-        if (rank1Text != null) rank1Text.text = (list != null && list.Length > 0) ? $"1st {list[0].name} : {list[0].score}" : "-";
-        if (rank2Text != null) rank2Text.text = (list != null && list.Length > 1) ? $"2nd {list[1].name} : {list[1].score}" : "-";
-        if (rank3Text != null) rank3Text.text = (list != null && list.Length > 2) ? $"3rd {list[2].name} : {list[2].score}" : "-";
+        // 네비게이션 버튼 상태 변경 (제출 완료 전엔 비활성화, 제출 완료 후 활성화)
+        if (hallOfFameRestartButton != null) hallOfFameRestartButton.interactable = !isEnteringInitial;
+        if (hallOfFameHomeButton != null) hallOfFameHomeButton.interactable = !isEnteringInitial;
     }
 
     public void OnClickRestart() { SceneManager.LoadScene(gameIndex.ToString()); }
