@@ -196,6 +196,16 @@ public class GameStateManager : MonoBehaviour
         UpdateSlotUI();
     }
 
+    // --- 버튼 OnClick 전용 래퍼 함수 (매개변수 0개) ---
+    public void OnClickSlot0Up() { OnClickSlotArrow(0, 1); }
+    public void OnClickSlot0Down() { OnClickSlotArrow(0, -1); }
+
+    public void OnClickSlot1Up() { OnClickSlotArrow(1, 1); }
+    public void OnClickSlot1Down() { OnClickSlotArrow(1, -1); }
+
+    public void OnClickSlot2Up() { OnClickSlotArrow(2, 1); }
+    public void OnClickSlot2Down() { OnClickSlotArrow(2, -1); }
+
     private void UpdateSlotUI()
     {
         for (int i = 0; i < 3; i++)
