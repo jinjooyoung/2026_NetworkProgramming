@@ -12,7 +12,7 @@ public class CardObject : MonoBehaviour
     {
         cardData = so;
         isMatched = false;
-        isFront = false;
+        isFront = true;     // 턴 시작 세팅은 앞면으로
         if (spriteRenderer != null && so != null) spriteRenderer.sprite = so.cardSprite;
     }
 }

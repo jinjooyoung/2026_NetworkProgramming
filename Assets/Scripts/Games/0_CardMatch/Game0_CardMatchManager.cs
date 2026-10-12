@@ -54,7 +54,6 @@ public class Game0_CardMatchManager : MonoBehaviour
         for (int i = 0; i < cardObjects.Count; i++)
         {
             cardObjects[i].Setup(cardList8[i]);
-            cardObjects[i].isFront = true;
             cardObjects[i].transform.rotation = Quaternion.identity; // 앞면
         }
 
@@ -69,10 +68,6 @@ public class Game0_CardMatchManager : MonoBehaviour
             card.transform.DORotate(new Vector3(0, 180, 0), 0.1f).SetEase(Ease.InOutQuad);
             card.isFront = false;
         }
-        foreach (var card in cardObjects)
-        {
-            card.isFront = false;
-        }
     }
 
     private void Update()
@@ -85,7 +80,7 @@ public class Game0_CardMatchManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 CardObject card = hit.collider.GetComponent<CardObject>();
-                if (card != null && !card.isFront && !card.isMatched)
+                if (card != null && !card.isFront && !card.isMatched && card != firstSelected)
                 {
                     FlipCardFront(card);
                 }
@@ -111,32 +106,54 @@ public class Game0_CardMatchManager : MonoBehaviour
 
     private IEnumerator CheckMatchRoutine()
     {
+        // 입력 블록 (두 번째 카드가 완전히 뒤집힌 후 비교 시작)
         isChecking = true;
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.15f);
 
         if (firstSelected.cardData.cardIndex == secondSelected.cardData.cardIndex)
         {
+            // 일치했을 때
             GameStateManager.Instance.AddScore(50);
             firstSelected.isMatched = true;
             secondSelected.isMatched = true;
+
+            firstSelected = null;
+            secondSelected = null;
+            isChecking = false; // 일치하면 즉시 다음 클릭 가능!
         }
         else
         {
+            // 불일치했을 때: 플레이어가 두 카드를 확인할 수 있게 0.25초만 보여준 뒤 다시 뒤집기
+            yield return new WaitForSeconds(0.25f);
+
             GameStateManager.Instance.AddScore(-30);
+
             firstSelected.transform.DORotate(new Vector3(0, 180, 0), 0.1f);
             secondSelected.transform.DORotate(new Vector3(0, 180, 0), 0.1f);
+
             firstSelected.isFront = false;
             secondSelected.isFront = false;
-        }
 
-        firstSelected = null;
-        secondSelected = null;
-        isChecking = false;
+            firstSelected = null;
+            secondSelected = null;
+            isChecking = false;
+        }
 
         // 전체 완성 여부 체크
         bool allClear = true;
-        foreach (var c in cardObjects) if (!c.isMatched) allClear = false;
+        foreach (var c in cardObjects)
+        {
+            if (!c.isMatched)
+            {
+                allClear = false;
+                break;
+            }
+        }
 
-        if (allClear) InitTurn();
+        if (allClear)
+        {
+            yield return new WaitForSeconds(0.3f);
+            InitTurn();
+        }
     }
 }
