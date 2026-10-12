@@ -54,6 +54,7 @@ public class Game0_CardMatchManager : MonoBehaviour
         for (int i = 0; i < cardObjects.Count; i++)
         {
             cardObjects[i].Setup(cardList8[i]);
+            cardObjects[i].isFront = true;
             cardObjects[i].transform.rotation = Quaternion.identity; // ¾Õ¸é
         }
 
@@ -66,6 +67,10 @@ public class Game0_CardMatchManager : MonoBehaviour
         foreach (var card in cardObjects)
         {
             card.transform.DORotate(new Vector3(0, 180, 0), 0.1f).SetEase(Ease.InOutQuad);
+            card.isFront = false;
+        }
+        foreach (var card in cardObjects)
+        {
             card.isFront = false;
         }
     }
