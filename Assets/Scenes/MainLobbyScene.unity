@@ -652,7 +652,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 767ecc58151a645499031705ca9d968d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
-  serverUrl: https://2026-networkprogramming-omnibus-server.onrender.com
+  serverUrl: https://two026-networkprogramming-omnibus-server.onrender.com
   cachedLeaderboard:
     game1: []
     game2: []

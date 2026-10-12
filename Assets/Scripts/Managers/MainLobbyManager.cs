@@ -5,7 +5,7 @@ using TMPro;
 
 public class MainLobbyManager : MonoBehaviour
 {
-    [Header("통합 최고점수 UI")]
+    [Header("통합 최고점수 UI (서버 전체 1위)")]
     public TextMeshProUGUI grandBestScoreText;
     public TextMeshProUGUI grandBestInitialText;
 
@@ -21,65 +21,81 @@ public class MainLobbyManager : MonoBehaviour
 
     private void Start()
     {
-        // 1. 서버 통신 전, 내 기기에 저장된 개인 최고 기록부터 먼저 UI에 즉시 표시
-        UpdateLocalGrandBestUI();
+        Debug.Log("[MainLobbyManager] Start 실행됨.");
 
-        // 2. NetworkManager 존재 체크 후 서버 리더보드 요청
-        if (NetworkManager.Instance != null)
+        // 1. 이미 NetworkManager에서 가져온 캐시 데이터가 있다면 즉시 UI 반영
+        if (NetworkManager.Instance != null && NetworkManager.Instance.cachedLeaderboard != null)
         {
+            Debug.Log("[MainLobbyManager] 기존 캐시 데이터가 존재하여 즉시 UI를 업데이트합니다.");
+            UpdateGrandBestUI();
+            StartCoroutine(RotateRankRoutine());
+        }
+        else if (NetworkManager.Instance != null)
+        {
+            Debug.Log("[MainLobbyManager] 캐시 데이터가 없어 서버에서 GetLeaderboard를 새로 요청합니다.");
             StartCoroutine(NetworkManager.Instance.GetLeaderboard((success) => {
                 if (success)
                 {
-                    // 서버 통신 성공 시 서버 전체 1위(또는 최신 데이터)로 UI 갱신 및 랭킹 롤링 시작
+                    Debug.Log("[MainLobbyManager] GetLeaderboard 성공 콜백 수신. UI 업데이트 진행.");
                     UpdateGrandBestUI();
+                    StopAllCoroutines();
                     StartCoroutine(RotateRankRoutine());
                 }
                 else
                 {
-                    Debug.LogWarning("[MainLobbyManager] 리더보드 데이터를 가져오는데 실패했습니다.");
+                    Debug.LogWarning("[MainLobbyManager] GetLeaderboard 요청 실패.");
+                    if (grandBestScoreText != null) grandBestScoreText.text = "0";
+                    if (grandBestInitialText != null) grandBestInitialText.text = "---";
                 }
             }));
         }
-    }
-
-    // [내 기기 개인 최고 기록] 로컬 PlayerPrefs에서 가장 높은 점수 가져오기
-    private void UpdateLocalGrandBestUI()
-    {
-        int myBest = 0;
-        for (int i = 0; i < 3; i++)
+        else
         {
-            int score = PlayerPrefs.GetInt($"BestScore{i}", 0);
-            if (score > myBest) myBest = score;
+            Debug.LogError("[MainLobbyManager] NetworkManager.Instance가 null입니다!");
         }
-
-        if (grandBestScoreText != null) grandBestScoreText.text = myBest.ToString("#,##0");
-        if (grandBestInitialText != null) grandBestInitialText.text = "MY BEST";
     }
 
-    // [서버 전체 최고 기록] 서버에 등록된 0~2번 게임 1등 중 최고점수 가져오기
+    // [서버 전체 최고 기록] 서버의 모든 게임 1~3위 기록 중 최고점수와 이니셜 표시
     private void UpdateGrandBestUI()
     {
         var lb = NetworkManager.Instance != null ? NetworkManager.Instance.cachedLeaderboard : null;
-        if (lb == null) return;
+        if (lb == null)
+        {
+            Debug.LogWarning("[UpdateGrandBestUI] cachedLeaderboard가 null이므로 UI 업데이트를 취소합니다.");
+            return;
+        }
 
         int maxScore = -1;
         string bestName = "---";
 
+        // 서버의 모든 게임 리더보드 데이터 순회 (0번, 1번, 2번 게임)
         ScoreEntry[][] all = { lb.game1, lb.game2, lb.game3 };
-        foreach (var list in all)
+        for (int i = 0; i < all.Length; i++)
         {
-            if (list != null && list.Length > 0 && list[0].score > maxScore)
+            var list = all[i];
+            if (list != null && list.Length > 0)
             {
-                maxScore = list[0].score;
-                bestName = list[0].name;
+                Debug.Log($"[UpdateGrandBestUI] Game {i} 1위: Score={list[0].score}, Name={list[0].name}");
+                if (list[0].score > maxScore)
+                {
+                    maxScore = list[0].score;
+                    bestName = list[0].name;
+                }
+            }
+            else
+            {
+                Debug.Log($"[UpdateGrandBestUI] Game {i} 데이터가 비어있습니다.");
             }
         }
 
-        if (maxScore > -1)
-        {
-            if (grandBestScoreText != null) grandBestScoreText.text = maxScore.ToString("#,##0");
-            if (grandBestInitialText != null) grandBestInitialText.text = bestName;
-        }
+        Debug.Log($"[UpdateGrandBestUI 최종 선택 결과] 최고점수: {maxScore}, 이니셜: {bestName}");
+
+        // 전체 1위 점수 및 해당 작성자 이니셜 UI 반영
+        if (grandBestScoreText != null)
+            grandBestScoreText.text = maxScore > -1 ? maxScore.ToString("#,##0") : "0";
+
+        if (grandBestInitialText != null)
+            grandBestInitialText.text = maxScore > -1 ? bestName : "---";
     }
 
     private IEnumerator RotateRankRoutine()
@@ -99,6 +115,8 @@ public class MainLobbyManager : MonoBehaviour
         if (lb == null) return;
 
         ScoreEntry[] list = lb.GetListByGameId(id);
+        Debug.Log($"[DisplayRank] ID: {id}({title}) 항목 개수: {(list != null ? list.Length : 0)}");
+
         if (rank1Text != null)
             rank1Text.text = (list != null && list.Length > 0) ? $"{list[0].score:#,##0}\n{list[0].name}" : "0\n---";
 

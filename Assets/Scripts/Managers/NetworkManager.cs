@@ -14,9 +14,9 @@ public class ScoreEntry
 [System.Serializable]
 public class LeaderboardData
 {
-    public ScoreEntry[] game1; // 0번 게임 (카드 짝맞추기)
-    public ScoreEntry[] game2; // 1번 게임 (스피드 분리수거)
-    public ScoreEntry[] game3; // 2번 게임 (후르츠 슬라이스)
+    public ScoreEntry[] game1;
+    public ScoreEntry[] game2;
+    public ScoreEntry[] game3;
 
     public ScoreEntry[] GetListByGameId(string gameId)
     {
@@ -44,7 +44,7 @@ public class EncryptedPayload
 public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance;
-    public string serverUrl = "https://2026-networkprogramming-omnibus-server.onrender.com";
+    public string serverUrl = "https://two026-networkprogramming-omnibus-server.onrender.com";
     private const string SECRET_KEY = "OmnibusKey";
 
     public LeaderboardData cachedLeaderboard;
@@ -56,7 +56,6 @@ public class NetworkManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            // [방법 2] 생성 직후 바로 서버 웜업(Warm-up) 통신 시도
             StartCoroutine(GetLeaderboard(null));
         }
         else
@@ -93,16 +92,33 @@ public class NetworkManager : MonoBehaviour
     {
         using (UnityWebRequest www = UnityWebRequest.Get(serverUrl + "/leaderboard"))
         {
-            // [방법 1] Cold Start 대기를 위해 타임아웃 60초 지정
             www.timeout = 60;
 
             yield return www.SendWebRequest();
             if (www.result == UnityWebRequest.Result.Success)
             {
-                EncryptedPayload payload = JsonUtility.FromJson<EncryptedPayload>(www.downloadHandler.text);
-                string json = Decrypt(payload.data);
-                cachedLeaderboard = JsonUtility.FromJson<LeaderboardData>(json);
-                onComplete?.Invoke(true);
+                try
+                {
+                    EncryptedPayload payload = JsonUtility.FromJson<EncryptedPayload>(www.downloadHandler.text);
+                    string json = Decrypt(payload.data);
+
+                    // JSON 키값 매핑 처리 ("0" -> "game1")
+                    json = json.Replace("\"0\":", "\"game1\":")
+                               .Replace("\"1\":", "\"game2\":")
+                               .Replace("\"2\":", "\"game3\":");
+
+                    cachedLeaderboard = JsonUtility.FromJson<LeaderboardData>(json);
+
+                    int len1 = cachedLeaderboard?.game1 != null ? cachedLeaderboard.game1.Length : 0;
+                    Debug.Log($"[GetLeaderboard 성공] Game1: {len1}개 항목 정상 파싱됨!");
+
+                    onComplete?.Invoke(true);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[GetLeaderboard 예외 발생] {ex.Message}");
+                    onComplete?.Invoke(false);
+                }
             }
             else
             {
@@ -115,25 +131,48 @@ public class NetworkManager : MonoBehaviour
     {
         PostData data = new PostData { gameId = gameId, name = name, score = score };
         string json = JsonUtility.ToJson(data);
-        EncryptedPayload payload = new EncryptedPayload { data = Encrypt(json) };
 
+        EncryptedPayload payload = new EncryptedPayload { data = Encrypt(json) };
         byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload));
+
         using (UnityWebRequest www = new UnityWebRequest(serverUrl + "/leaderboard", "POST"))
         {
             www.uploadHandler = new UploadHandlerRaw(bodyRaw);
             www.downloadHandler = new DownloadHandlerBuffer();
             www.SetRequestHeader("Content-Type", "application/json");
 
-            // [방법 1] Cold Start 대기를 위해 타임아웃 60초 지정
             www.timeout = 60;
 
             yield return www.SendWebRequest();
+
             if (www.result == UnityWebRequest.Result.Success)
             {
-                EncryptedPayload resPayload = JsonUtility.FromJson<EncryptedPayload>(www.downloadHandler.text);
-                string resJson = Decrypt(resPayload.data);
-                cachedLeaderboard = JsonUtility.FromJson<LeaderboardData>(resJson);
-                onComplete?.Invoke(true);
+                try
+                {
+                    EncryptedPayload resPayload = JsonUtility.FromJson<EncryptedPayload>(www.downloadHandler.text);
+                    string resJson = Decrypt(resPayload.data);
+
+                    if (string.IsNullOrEmpty(resJson))
+                    {
+                        onComplete?.Invoke(false);
+                        yield break;
+                    }
+
+                    // JSON 키값 매핑 처리 ("0" -> "game1")
+                    resJson = resJson.Replace("\"0\":", "\"game1\":")
+                                     .Replace("\"1\":", "\"game2\":")
+                                     .Replace("\"2\":", "\"game3\":");
+
+                    cachedLeaderboard = JsonUtility.FromJson<LeaderboardData>(resJson);
+                    Debug.Log("[PostScore 성공] LeaderboardData 캐시 정상 갱신 완료!");
+
+                    onComplete?.Invoke(true);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[PostScore 실패] JSON 파싱 예외 발생: {ex.Message}");
+                    onComplete?.Invoke(false);
+                }
             }
             else
             {

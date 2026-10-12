@@ -77,12 +77,24 @@ app.post('/leaderboard', (req, res) => {
     const { gameId, name, score } = body;
     let scores = readScores();
 
-    if (!scores[gameId]) scores[gameId] = [];
+    // ID 매핑 (0 -> game1, 1 -> game2, 2 -> game3)
+    let altId = gameId;
+    if (gameId === "0") altId = "game1";
+    else if (gameId === "1") altId = "game2";
+    else if (gameId === "2") altId = "game3";
+    else if (gameId === "game1") altId = "0";
+    else if (gameId === "game2") altId = "1";
+    else if (gameId === "game3") altId = "2";
 
-    // 신규 데이터 삽입 후 내림차순 정렬 및 상위 3개 보존
-    scores[gameId].push({ name: name.toUpperCase().substring(0, 3), score: parseInt(score) });
-    scores[gameId].sort((a, b) => b.score - a.score);
-    scores[gameId] = scores[gameId].slice(0, 3);
+    const newEntry = { name: name.toUpperCase().substring(0, 3), score: parseInt(score) };
+
+    // 메인 키와 서브 키 양쪽 모두에 데이터 추가 및 정렬
+    [gameId, altId].forEach(id => {
+        if (!scores[id]) scores[id] = [];
+        scores[id].push(newEntry);
+        scores[id].sort((a, b) => b.score - a.score);
+        scores[id] = scores[id].slice(0, 3);
+    });
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(scores, null, 2));
     res.json({ data: encrypt(scores) });
