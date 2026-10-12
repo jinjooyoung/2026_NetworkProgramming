@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class SettingPopup : MonoBehaviour
@@ -54,4 +55,6 @@ public class SettingPopup : MonoBehaviour
             }
         }
     }
+
+    public void OnClickMain() { SceneManager.LoadScene("MainLobbyScene"); }
 }

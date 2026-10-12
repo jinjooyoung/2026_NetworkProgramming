@@ -4,7 +4,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
-// CS0246 에러를 해결하기 위한 데이터 구조 클래스들
 [System.Serializable]
 public class ScoreEntry
 {
@@ -42,7 +41,6 @@ public class EncryptedPayload
     public string data;
 }
 
-// CS0103 에러를 해결하기 위한 NetworkManager 매니저 클래스
 public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance;
@@ -57,6 +55,9 @@ public class NetworkManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            // [방법 2] 생성 직후 바로 서버 웜업(Warm-up) 통신 시도
+            StartCoroutine(GetLeaderboard(null));
         }
         else
         {
@@ -92,6 +93,9 @@ public class NetworkManager : MonoBehaviour
     {
         using (UnityWebRequest www = UnityWebRequest.Get(serverUrl + "/leaderboard"))
         {
+            // [방법 1] Cold Start 대기를 위해 타임아웃 60초 지정
+            www.timeout = 60;
+
             yield return www.SendWebRequest();
             if (www.result == UnityWebRequest.Result.Success)
             {
@@ -119,6 +123,9 @@ public class NetworkManager : MonoBehaviour
             www.uploadHandler = new UploadHandlerRaw(bodyRaw);
             www.downloadHandler = new DownloadHandlerBuffer();
             www.SetRequestHeader("Content-Type", "application/json");
+
+            // [방법 1] Cold Start 대기를 위해 타임아웃 60초 지정
+            www.timeout = 60;
 
             yield return www.SendWebRequest();
             if (www.result == UnityWebRequest.Result.Success)

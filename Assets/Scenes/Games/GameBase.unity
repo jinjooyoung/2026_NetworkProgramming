@@ -1034,10 +1034,10 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1768506949}
   - {fileID: 1816000801}
   - {fileID: 331374152}
   - {fileID: 505186721}
+  - {fileID: 1768506949}
   - {fileID: 905359732}
   - {fileID: 1639180945}
   - {fileID: 570108653}
@@ -4327,6 +4327,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5414194235313473071, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5414194235313473071, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7349043729660394748, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7349043729660394748, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7349043729660394748, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5266,6 +5286,7 @@ MonoBehaviour:
   countdownText: {fileID: 1333278160}
   gameOverPanel: {fileID: 1639180944}
   scorePanel: {fileID: 570108652}
+  scorePanelCanvasGroup: {fileID: 0}
   panelNormal: {fileID: 32398662}
   normalBestScoreText: {fileID: 1999100390}
   normalCurrentScoreText: {fileID: 967768723}

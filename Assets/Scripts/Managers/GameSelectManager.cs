@@ -18,4 +18,6 @@ public class GameSelectManager : MonoBehaviour
     {
         SceneManager.LoadScene(gameIndex.ToString());
     }
+
+    public void OnClickMain() { SceneManager.LoadScene("MainLobbyScene"); }
 }

@@ -30,6 +30,7 @@ public class GameStateManager : MonoBehaviour
 
     [Header("스코어 패널 루트")]
     public GameObject scorePanel;
+    public CanvasGroup scorePanelCanvasGroup;
 
     [Header("일반점수화면 (일반 & 개인최고 공용)")]
     public GameObject panelNormal;
@@ -65,6 +66,8 @@ public class GameStateManager : MonoBehaviour
         if (countdownPanel != null) countdownPanel.SetActive(true);
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         if (scorePanel != null) scorePanel.SetActive(false);
+
+        SetPanelState(scorePanelCanvasGroup, false);
 
         StartCoroutine(StartCountdownRoutine());
     }
@@ -131,6 +134,7 @@ public class GameStateManager : MonoBehaviour
     private void ShowScorePanel()
     {
         if (scorePanel != null) scorePanel.SetActive(true);
+        SetPanelState(scorePanelCanvasGroup, true);
 
         int localBest = PlayerPrefs.GetInt($"BestScore{gameIndex}", 0);
         int rank3Cutoff = NetworkManager.Instance != null ? NetworkManager.Instance.GetCutoffScore(gameIndex.ToString()) : 0;
@@ -190,6 +194,17 @@ public class GameStateManager : MonoBehaviour
         }
     }
 
+    // 패널 활성화/비활성화 및 CanvasGroup 상태 제어 헬퍼 함수
+    private void SetPanelState(CanvasGroup canvasGroup, bool isActive)
+    {
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = isActive ? 1f : 0f;
+            canvasGroup.blocksRaycasts = isActive;
+            canvasGroup.interactable = isActive;
+        }
+    }
+
     public void OnClickSlotArrow(int slotIdx, int dir)
     {
         slotIndices[slotIdx] = (slotIndices[slotIdx] + dir + 26) % 26;
@@ -217,14 +232,35 @@ public class GameStateManager : MonoBehaviour
 
     public void OnClickSubmit()
     {
-        // 제출 시 룰렛 조작 버튼과 저장 버튼 비활성화, 재시작/처음으로 버튼 활성화
+        // 1. 제출 UI 비활성화
         SetHallOfFameInteractable(false);
 
-        string initial = $"{slotTexts[0].text}{slotTexts[1].text}{slotTexts[2].text}";
+        // 2. 이니셜 문자열 생성
+        string initial = "AAA";
+        if (slotTexts != null && slotTexts.Length >= 3 &&
+            slotTexts[0] != null && slotTexts[1] != null && slotTexts[2] != null)
+        {
+            initial = $"{slotTexts[0].text}{slotTexts[1].text}{slotTexts[2].text}";
+        }
 
-        StartCoroutine(NetworkManager.Instance.PostScore(gameIndex.ToString(), initial, currentScore, (success) => {
-            // 필요 시 서버 전송 완료 후 동작
-        }));
+        // 3. 서버 점수 전송
+        if (NetworkManager.Instance != null)
+        {
+            StartCoroutine(NetworkManager.Instance.PostScore(gameIndex.ToString(), initial, currentScore, (success) => {
+                if (success)
+                {
+                    Debug.Log("서버 최고기록 송신 완료");
+                }
+                else
+                {
+                    Debug.LogWarning("서버 전송 실패 또는 타임아웃");
+                }
+            }));
+        }
+        else
+        {
+            Debug.LogWarning("[GameStateManager] NetworkManager가 씬에 존재하지 않습니다.");
+        }
     }
 
     private void SetHallOfFameInteractable(bool isEnteringInitial)
