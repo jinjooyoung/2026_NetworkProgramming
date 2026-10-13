@@ -19,7 +19,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI scoreText;        // 점수 표시용 TMP
 
     // 생명 색상 정의 (#C6C5C5: 회색 / #F44336: 빨간색)
-    private readonly Color colorGray = new Color32(0xC6, 0xC5, 0xC5, 0xFF);
+    private readonly Color colorGray = new Color32(0x70, 0x70, 0x6E, 0xFF);
     private readonly Color colorRed = new Color32(0xF4, 0x43, 0x36, 0xFF);
 
     private void Awake()

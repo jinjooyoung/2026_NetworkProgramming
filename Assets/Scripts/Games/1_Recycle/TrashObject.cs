@@ -5,7 +5,6 @@ public class TrashObject : MonoBehaviour
 {
     public TrashDataSO trashData;
     public SpriteRenderer spriteRenderer;
-    public Collider2D col2D;
     private Vector3 originPos;
     private bool isDragging = false;
 
@@ -38,32 +37,43 @@ public class TrashObject : MonoBehaviour
         if (!isDragging) return;
         isDragging = false;
 
-        // 놓았을 때 해당 위치로 Ray2D 발사
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.zero);
+        // 1. 자기 자신의 콜라이더를 잠시 끔 (Self-Hit 방지)
+        Collider myCollider = GetComponent<Collider>();
+        if (myCollider != null) myCollider.enabled = false;
 
-        if (hit.collider != null)
+        // 2. 3D 화면 지점 마우스 레이 발사
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Debug.Log("3D 레이 발사");
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
         {
             SpaceZone zone = hit.collider.GetComponent<SpaceZone>();
 
-            // 스페이스존 컴포넌트가 존재하는 경우
+            // 스페이스존 컴포넌트가 존재할 경우
             if (zone != null)
             {
                 bool isCorrect = (zone.spaceType == trashData.trashType);
 
-                // 점수 가감 (일치: +50, 불일치: -30)
+                // 점수 가감
                 GameStateManager.Instance.AddScore(isCorrect ? 50 : -30);
 
-                // 매니저를 통해 비활성화 및 리셋 코루틴 실행
-                var manager = FindObjectOfType<Game1_RecycleManager>();
+                // 리셋 진행
+                var manager = FindFirstObjectByType<Game1_RecycleManager>();
                 if (manager != null)
                 {
                     manager.ResetTrashObject(this, originPos);
                 }
+
+                // 콜라이더 복구 후 리턴
+                if (myCollider != null) myCollider.enabled = true;
                 return;
             }
         }
 
-        // 스페이스존이 아니거나 히트된 것이 없으면 원위치로 되돌리기만 함
+        // 3. 콜라이더 다시 복구
+        if (myCollider != null) myCollider.enabled = true;
+
+        // 스페이스존이 아니거나 감지된 것이 없으면 원위치 복귀
         transform.position = originPos;
     }
 }

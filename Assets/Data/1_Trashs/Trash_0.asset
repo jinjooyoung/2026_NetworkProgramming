@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrashDataSO
   trashIndex: 0
   trashType: 0
-  trashSprite: {fileID: 0}
+  trashSprite: {fileID: 21300000, guid: 37b0c51da508ce14690c4d8fe222a31f, type: 3}

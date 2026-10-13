@@ -394,6 +394,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SettingPopup
       objectReference: {fileID: 0}
+    - target: {fileID: 533299936556101795, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1135232685394544735, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -476,23 +480,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5414194235313473071, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5414194235313473071, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7349043729660394748, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7349043729660394748, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7349043729660394748, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -750,6 +754,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameSelectButton (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 3786893224222999059, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
+      propertyPath: m_text
+      value: "\uD6C4\uB974\uCE20 \uC2AC\uB77C\uC774\uC2A4"
+      objectReference: {fileID: 0}
     - target: {fileID: 3977333793177145785, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
       propertyPath: gameIndex
       value: 2
@@ -833,6 +841,10 @@ PrefabInstance:
     - target: {fileID: 6565050892382066911, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6721327392792495983, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 151
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1083,8 +1095,8 @@ RectTransform:
   - {fileID: 1713402029}
   - {fileID: 1698637634}
   - {fileID: 1801714112}
-  - {fileID: 806004227}
   - {fileID: 1755373082}
+  - {fileID: 806004227}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1668,6 +1680,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameSelectButton (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 3786893224222999059, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
+      propertyPath: m_text
+      value: "\uC2A4\uD53C\uB4DC \uBD84\uB9AC\uC218\uAC70"
+      objectReference: {fileID: 0}
     - target: {fileID: 3977333793177145785, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
       propertyPath: gameIndex
       value: 1
@@ -1752,6 +1768,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6721327392792495983, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 151
+      objectReference: {fileID: 0}
+    - target: {fileID: 7421160103108764561, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 84
+      objectReference: {fileID: 0}
+    - target: {fileID: 7421160103108764561, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 84
+      objectReference: {fileID: 0}
+    - target: {fileID: 7421160103108764561, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 26
+      objectReference: {fileID: 0}
+    - target: {fileID: 9044944800675002517, guid: 37e1e19fa885d1e4f818c33ce2017365, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 6633aadc33eff7f48a1d4d9e5622f727, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
