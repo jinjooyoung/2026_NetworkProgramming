@@ -9,7 +9,6 @@ public class DeadZone : MonoBehaviour
         if (fruit != null && fruit.gameObject.activeSelf)
         {
             fruit.gameObject.SetActive(false);
-            GameStateManager.Instance.AddScore(-30);
         }
     }
 }

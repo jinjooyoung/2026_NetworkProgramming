@@ -1957,6 +1957,7 @@ GameObject:
   m_Component:
   - component: {fileID: 570108653}
   - component: {fileID: 570108654}
+  - component: {fileID: 570108655}
   m_Layer: 5
   m_Name: ScorePanel
   m_TagString: Untagged
@@ -1994,6 +1995,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 570108652}
   m_CullTransparentMesh: 1
+--- !u!225 &570108655
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570108652}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &607620732
 GameObject:
   m_ObjectHideFlags: 0
@@ -5812,7 +5825,7 @@ MonoBehaviour:
   countdownText: {fileID: 1333278160}
   gameOverPanel: {fileID: 1639180944}
   scorePanel: {fileID: 570108652}
-  scorePanelCanvasGroup: {fileID: 0}
+  scorePanelCanvasGroup: {fileID: 570108655}
   panelNormal: {fileID: 32398662}
   normalBestScoreText: {fileID: 1999100390}
   normalCurrentScoreText: {fileID: 967768723}
