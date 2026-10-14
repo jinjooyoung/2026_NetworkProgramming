@@ -56,5 +56,9 @@ public class SettingPopup : MonoBehaviour
         }
     }
 
-    public void OnClickMain() { SceneManager.LoadScene("MainLobbyScene"); }
+    public void OnClickMain()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("MainLobbyScene");
+    }
 }
