@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 5334863716661500534}
   - component: {fileID: 2004902309595371436}
   - component: {fileID: 3977333793177145785}
+  - component: {fileID: 2567485409912281863}
   m_Layer: 5
   m_Name: GameSelectButton
   m_TagString: Untagged
@@ -275,6 +276,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameSelectButton
   gameIndex: 0
   bestScoreText: {fileID: 4139126446845803470}
+--- !u!114 &2567485409912281863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2382369033652406219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5169496aa25e49e88c436024260cfc3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonEffect
+  pressScale: 0.95
+  overshootScale: 1.05
+  releaseDuration: 0.15
+  playClickSound: 1
+  clickSound: 0
 --- !u!1 &2976977118194346709
 GameObject:
   m_ObjectHideFlags: 0

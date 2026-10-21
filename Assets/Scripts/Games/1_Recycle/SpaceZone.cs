@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 1¹ø °ÔÀÓ: ¼ö°ÅÇÔ ¿µ¿ª ½ºÅ©¸³Æ®
+// 1ë²ˆ ê²Œì„: ìˆ˜ê±°í•¨ ì˜ì—­ ìŠ¤í¬ë¦½íŠ¸
 public class SpaceZone : MonoBehaviour
 {
     public TrashType spaceType;

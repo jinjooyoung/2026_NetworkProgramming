@@ -365,6 +365,7 @@ GameObject:
   - component: {fileID: 4038999266918291866}
   - component: {fileID: 6012937641552128344}
   - component: {fileID: 456971939747693143}
+  - component: {fileID: 3738916918302344649}
   m_Layer: 5
   m_Name: SettingButton
   m_TagString: Untagged
@@ -485,6 +486,23 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3738916918302344649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487515143734401349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5169496aa25e49e88c436024260cfc3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonEffect
+  pressScale: 0.95
+  overshootScale: 1.05
+  releaseDuration: 0.15
+  playClickSound: 1
+  clickSound: 0
 --- !u!1 &1636815584671612202
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,6 +688,7 @@ GameObject:
   - component: {fileID: 4539509304938176625}
   - component: {fileID: 2595769122126075478}
   - component: {fileID: 4170368768746354473}
+  - component: {fileID: 3016355001279135793}
   m_Layer: 5
   m_Name: Exit_Button
   m_TagString: Untagged
@@ -791,6 +810,23 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3016355001279135793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3019753430734584270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5169496aa25e49e88c436024260cfc3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonEffect
+  pressScale: 0.95
+  overshootScale: 1.05
+  releaseDuration: 0.15
+  playClickSound: 1
+  clickSound: 0
 --- !u!1 &3341410839142339586
 GameObject:
   m_ObjectHideFlags: 0
@@ -878,6 +914,7 @@ GameObject:
   - component: {fileID: 1071739407097470234}
   - component: {fileID: 4127485680563614087}
   - component: {fileID: 6883466799726729138}
+  - component: {fileID: 723252419034265636}
   m_Layer: 5
   m_Name: Off_Button
   m_TagString: Untagged
@@ -999,6 +1036,23 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &723252419034265636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3947363579984651880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5169496aa25e49e88c436024260cfc3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonEffect
+  pressScale: 0.95
+  overshootScale: 1.05
+  releaseDuration: 0.15
+  playClickSound: 1
+  clickSound: 0
 --- !u!1 &4093580361055744551
 GameObject:
   m_ObjectHideFlags: 0

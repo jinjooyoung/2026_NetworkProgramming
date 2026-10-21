@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 0¹ø °ÔÀÓ: Ä«µå SO
+// 0ë²ˆ ê²Œìž„: ì¹´ë“œ SO
 [CreateAssetMenu(fileName = "CardData", menuName = "Omnibus/CardData")]
 public class CardDataSO : ScriptableObject
 {

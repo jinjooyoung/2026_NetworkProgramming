@@ -2,7 +2,7 @@ using UnityEngine;
 
 public enum TrashType { Plastic, Can, Paper }
 
-// 1¹ø °ÔÀÓ: ¾²·¹±â SO
+// 1ë²ˆ ê²Œìž„: ì“°ë ˆê¸° SO
 [CreateAssetMenu(fileName = "TrashData", menuName = "Omnibus/TrashData")]
 public class TrashDataSO : ScriptableObject
 {

@@ -12,13 +12,13 @@ public class ScoreManager : MonoBehaviour
     public TMP_Text bestText;
     public TMP_Text hudText;
 
-    void Start()                          // Ãß°¡
+    void Start()                          // ì¶”ê°€
     {
         Time.timeScale = 0f;
         startPanel.SetActive(true);
     }
 
-    public void StartGame()               // Ãß°¡
+    public void StartGame()               // ì¶”ê°€
     {
         startPanel.SetActive(false);
         Time.timeScale = 1f;

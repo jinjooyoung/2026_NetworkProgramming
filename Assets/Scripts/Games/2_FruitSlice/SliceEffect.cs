@@ -22,7 +22,7 @@ public class SliceEffect : MonoBehaviour
             c.a = 1f;
             spriteRenderer.color = c;
 
-            // Å©±â°¡ °¡·Î·Î ¬d ´Ã¾î³ª¸é¼­ ¾ËÆÄ°ªÀÌ 0À¸·Î ÆäÀÌµå¾Æ¿ô
+            // í¬ê¸°ê°€ ê°€ë¡œë¡œ ì´¥ ëŠ˜ì–´ë‚˜ë©´ì„œ ì•ŒíŒŒê°’ì´ 0ìœ¼ë¡œ íŽ˜ì´ë“œì•„ì›ƒ
             transform.DOScaleX(0.8f, 0.15f).SetEase(Ease.OutQuad);
             spriteRenderer.DOFade(0f, 0.15f).OnComplete(() => {
                 gameObject.SetActive(false);

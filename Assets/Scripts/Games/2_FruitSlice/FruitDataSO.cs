@@ -1,10 +1,10 @@
 using UnityEngine;
 
-// 2¹ø °ÔÀÓ: °úÀÏ ¹× ÆøÅº SO
+// 2ë²ˆ ê²Œì„: ê³¼ì¼ ë° í­íƒ„ SO
 [CreateAssetMenu(fileName = "FruitData", menuName = "Omnibus/FruitData")]
 public class FruitDataSO : ScriptableObject
 {
-    public bool isBomb = false; // true¸é ÆøÅº, false¸é ÀÏ¹İ °úÀÏ
+    public bool isBomb = false; // trueë©´ í­íƒ„, falseë©´ ì¼ë°˜ ê³¼ì¼
     public int score = 50;
     public Sprite fruitSprite;
 }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 0¹ø °ÔÀÓ: Ä«µå ¿ÀºêÁ§Æ® °³º° ½ºÅ©¸³Æ®
+// 0ë²ˆ ê²Œì„: ì¹´ë“œ ì˜¤ë¸Œì íŠ¸ ê°œë³„ ìŠ¤í¬ë¦½íŠ¸
 public class CardObject : MonoBehaviour
 {
     public CardDataSO cardData;
@@ -12,7 +12,7 @@ public class CardObject : MonoBehaviour
     {
         cardData = so;
         isMatched = false;
-        isFront = true;     // ÅÏ ½ÃÀÛ ¼¼ÆÃÀº ¾Õ¸éÀ¸·Î
+        isFront = true;     // í„´ ì‹œì‘ ì„¸íŒ…ì€ ì•ë©´ìœ¼ë¡œ
         if (spriteRenderer != null && so != null) spriteRenderer.sprite = so.cardSprite;
     }
 }

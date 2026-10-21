@@ -59,6 +59,6 @@ public class SettingPopup : MonoBehaviour
     public void OnClickMain()
     {
         Time.timeScale = 1;
-        SceneManager.LoadScene("MainLobbyScene");
+        SceneManager.LoadScene(SceneNames.MainLobby); // [변경] 씬 이름 → SceneNames
     }
 }

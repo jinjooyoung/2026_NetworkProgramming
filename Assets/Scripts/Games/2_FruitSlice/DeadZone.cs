@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 2¹ø °ÔÀÓ: È­¸é ¹Û Æ®¸®°Å »ç¹æ µ¥µåÁ¸ ½ºÅ©¸³Æ®
+// 2ë²ˆ ê²Œì„: í™”ë©´ ë°– íŠ¸ë¦¬ê±° ì‚¬ë°© ë°ë“œì¡´ ìŠ¤í¬ë¦½íŠ¸
 public class DeadZone : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)

@@ -5,7 +5,7 @@ using UnityEngine;
 public class Game1_RecycleManager : MonoBehaviour
 {
     public List<TrashDataSO> allTrashSOs;
-    public List<TrashObject> trashObjects; // 5°³ ÁöÁ¤
+    public List<TrashObject> trashObjects; // 5ê°œ ì§€ì •
     public float respawnDelay = 0.5f;
 
     private void Start()
@@ -30,19 +30,19 @@ public class Game1_RecycleManager : MonoBehaviour
 
     private IEnumerator ResetTrashRoutine(TrashObject trash, Vector3 originPos)
     {
-        // 1. ºñÈ°¼ºÈ­
+        // 1. ë¹„í™œì„±í™”
         trash.gameObject.SetActive(false);
 
-        // 2. ¿øÀ§Ä¡·Î ÀÌµ¿
+        // 2. ì›ìœ„ì¹˜ë¡œ ì´ë™
         trash.transform.position = originPos;
 
-        // 3. SO ´Ù½Ã ÇÒ´ç ¹× ¸®¼Ò½º ¼Â¾÷
+        // 3. SO ë‹¤ì‹œ í• ë‹¹ ë° ë¦¬ì†ŒìŠ¤ ì…‹ì—…
         AssignRandomSO(trash);
 
-        // 4. µô·¹ÀÌ
+        // 4. ë”œë ˆì´
         yield return new WaitForSeconds(respawnDelay);
 
-        // 5. ¿ÀºêÁ§Æ® ÀçÈ°¼ºÈ­
+        // 5. ì˜¤ë¸Œì íŠ¸ ì¬í™œì„±í™”
         trash.gameObject.SetActive(true);
     }
 }

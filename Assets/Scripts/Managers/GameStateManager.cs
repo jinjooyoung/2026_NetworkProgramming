@@ -10,36 +10,36 @@ public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager Instance;
 
-    [Header("°ÔÀÓ ±âº» ¼³Á¤")]
+    [Header("ê²Œì„ ê¸°ë³¸ ì„¤ì •")]
     public int gameIndex;
     public GameType gameType;
     public float timeLimit = 60f;
     public int maxLife = 3;
 
-    [Header("½Ç½Ã°£ »óÅÂ º¯¼ö")]
+    [Header("ì‹¤ì‹œê°„ ìƒíƒœ ë³€ìˆ˜")]
     public bool isGameStarted = false;
     public bool isGameOver = false;
     public float currentTime;
     public int currentLife;
     public int currentScore = 0;
 
-    [Header("Ä«¿îÆ®´Ù¿î & °ÔÀÓ¿À¹ö UI")]
+    [Header("ì¹´ìš´íŠ¸ë‹¤ìš´ & ê²Œì„ì˜¤ë²„ UI")]
     public GameObject countdownPanel;
     public TextMeshProUGUI countdownText;
     public GameObject gameOverPanel;
 
-    [Header("½ºÄÚ¾î ÆĞ³Î ·çÆ®")]
+    [Header("ìŠ¤ì½”ì–´ íŒ¨ë„ ë£¨íŠ¸")]
     public GameObject scorePanel;
     public CanvasGroup scorePanelCanvasGroup;
 
-    [Header("ÀÏ¹İÁ¡¼öÈ­¸é (ÀÏ¹İ & °³ÀÎÃÖ°í °ø¿ë)")]
+    [Header("ì¼ë°˜ì ìˆ˜í™”ë©´ (ì¼ë°˜ & ê°œì¸ìµœê³  ê³µìš©)")]
     public GameObject panelNormal;
     public TextMeshProUGUI normalBestScoreText;
     public TextMeshProUGUI normalCurrentScoreText;
     public Button normalRestartButton;
     public Button normalHomeButton;
 
-    [Header("·©Å·Á¡¼öÈ­¸é (¸í¿¹ÀÇ Àü´ç)")]
+    [Header("ë­í‚¹ì ìˆ˜í™”ë©´ (ëª…ì˜ˆì˜ ì „ë‹¹)")]
     public GameObject panelHallOfFame;
     public TextMeshProUGUI hallOfFameCurrentScoreText;
     public TextMeshProUGUI[] slotTexts = new TextMeshProUGUI[3];
@@ -50,9 +50,27 @@ public class GameStateManager : MonoBehaviour
     public Button hallOfFameRestartButton;
     public Button hallOfFameHomeButton;
 
-    // ÆùÆ® »ö»ó Á¤ÀÇ (³²»ö: #2D324D / ³ë¶õ»ö: #FEC90D)
+    // í°íŠ¸ ìƒ‰ìƒ ì •ì˜ (ë‚¨ìƒ‰: #2D324D / ë…¸ë€ìƒ‰: #FEC90D)
     private readonly Color colorNormal = new Color32(0x2D, 0x32, 0x4D, 0xFF);
     private readonly Color colorBest = new Color32(0xFE, 0xC9, 0x0D, 0xFF);
+
+    // ===================== [ì‹ ê·œ] í”¼ë“œë°± ì—°ì¶œ =====================
+    [Header("[ì‹ ê·œ] í”¼ë“œë°± ì—°ì¶œ")]
+    [Tooltip("í™”ë©´ ì „ì²´ë¥¼ ë®ëŠ” ë¹¨ê°„ íƒ€ê²© ì´ë¯¸ì§€ (RaycastTarget êº¼ì§, ì•ŒíŒŒ 0)")]
+    public Image hitFlashImage;
+    [Range(0f, 1f)] public float hitFlashAlpha = 0.35f;
+    public float cameraShakeDuration = 0.25f;
+    public float cameraShakeStrength = 0.15f;
+
+    private float lastNegativeFeedbackTime = -1f;
+
+    /// <summary>
+    /// [ì‹ ê·œ] ê²Œì„ ì…ë ¥ì„ ë§‰ì•„ì•¼ í•˜ëŠ” ìƒíƒœì¸ì§€ (ê²Œì„ ì‹œì‘ ì „ / ê²Œì„ì˜¤ë²„ / ì„¤ì • íŒì—…Â·íŠœí† ë¦¬ì–¼ë¡œ ì¼ì‹œì •ì§€)
+    /// ê° ë¯¸ë‹ˆê²Œì„ ë§¤ë‹ˆì €ì˜ ì…ë ¥ ì²´í¬ì—ì„œ ê³µí†µìœ¼ë¡œ ì‚¬ìš©
+    /// </summary>
+    public static bool IsInputBlocked =>
+        Instance == null || !Instance.isGameStarted || Instance.isGameOver || Time.timeScale <= 0f;
+    // ==============================================================
 
     private void Awake() { Instance = this; }
 
@@ -105,6 +123,10 @@ public class GameStateManager : MonoBehaviour
         if (isGameOver) return;
         currentScore = Mathf.Max(0, currentScore + amount);
         UIManager.Instance.UpdateScoreUI();
+
+        // [ì‹ ê·œ] ì ìˆ˜ ì¦ê° í”¼ë“œë°±
+        if (amount > 0) PlaySFX(SFXType.ScoreUp);
+        else if (amount < 0) PlayNegativeFeedback();
     }
 
     public void ReduceLife(int amount = 1)
@@ -112,6 +134,29 @@ public class GameStateManager : MonoBehaviour
         if (isGameOver) return;
         currentLife -= amount;
         UIManager.Instance.UpdateLifeUI();
+
+        // [ì‹ ê·œ] ì²´ë ¥ ê°ì†Œ í”¼ë“œë°±
+        PlayNegativeFeedback();
+    }
+
+    /// <summary>
+    /// [ì‹ ê·œ] ë¶€ì • í”¼ë“œë°± : ì¹´ë©”ë¼ í”ë“¤ë¦¼ + ë¹¨ê°„ í™”ë©´ ë²ˆì© + ì‚- ì‚¬ìš´ë“œ
+    /// (í­íƒ„ì²˜ëŸ¼ ì ìˆ˜ ê°ì†Œì™€ ì²´ë ¥ ê°ì†Œê°€ ê°™ì€ ìˆœê°„ì— ì¼ì–´ë‚˜ë©´ 1ë²ˆë§Œ ì¬ìƒ)
+    /// </summary>
+    private void PlayNegativeFeedback()
+    {
+        if (Time.unscaledTime - lastNegativeFeedbackTime < 0.05f) return;
+        lastNegativeFeedbackTime = Time.unscaledTime;
+
+        DOTweenManager.ShakeCamera(null, cameraShakeDuration, cameraShakeStrength);
+        DOTweenManager.HitFlash(hitFlashImage, hitFlashAlpha);
+        PlaySFX(SFXType.ScoreDown);
+    }
+
+    // [ì‹ ê·œ]
+    private void PlaySFX(SFXType type)
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX(type);
     }
 
     public void TriggerGameOver()
@@ -142,19 +187,19 @@ public class GameStateManager : MonoBehaviour
         if (panelNormal != null) panelNormal.SetActive(false);
         if (panelHallOfFame != null) panelHallOfFame.SetActive(false);
 
-        // TOP 3 ·©Å· ´Ş¼º ¿©ºÎ Ã¼Å©
+        // TOP 3 ë­í‚¹ ë‹¬ì„± ì—¬ë¶€ ì²´í¬
         if (currentScore > rank3Cutoff)
         {
-            // 1. ·©Å·Á¡¼öÈ­¸é (¸í¿¹ÀÇ Àü´ç ÆĞ³Î)
+            // 1. ë­í‚¹ì ìˆ˜í™”ë©´ (ëª…ì˜ˆì˜ ì „ë‹¹ íŒ¨ë„)
             if (panelHallOfFame != null) panelHallOfFame.SetActive(true);
 
             if (hallOfFameCurrentScoreText != null)
                 hallOfFameCurrentScoreText.text = $"{currentScore}";
 
-            // ÃÊ±â ¹öÆ° È°¼ºÈ­/ºñÈ°¼ºÈ­ Ã³¸®
+            // ì´ˆê¸° ë²„íŠ¼ í™œì„±í™”/ë¹„í™œì„±í™” ì²˜ë¦¬
             SetHallOfFameInteractable(true);
 
-            // ·ÎÄÃ ÃÖ°íÁ¡¼ö °»½Å
+            // ë¡œì»¬ ìµœê³ ì ìˆ˜ ê°±ì‹ 
             if (currentScore > localBest)
             {
                 PlayerPrefs.SetInt($"BestScore{gameIndex}", currentScore);
@@ -165,7 +210,7 @@ public class GameStateManager : MonoBehaviour
         }
         else
         {
-            // 2. ÀÏ¹İÁ¡¼öÈ­¸é (ÀÏ¹İ ¶Ç´Â °³ÀÎÃÖ°í ÆĞ³Î)
+            // 2. ì¼ë°˜ì ìˆ˜í™”ë©´ (ì¼ë°˜ ë˜ëŠ” ê°œì¸ìµœê³  íŒ¨ë„)
             if (panelNormal != null) panelNormal.SetActive(true);
 
             bool isNewBest = currentScore > localBest;
@@ -177,7 +222,7 @@ public class GameStateManager : MonoBehaviour
                 localBest = currentScore;
             }
 
-            // »ö»ó °áÁ¤ (°³ÀÎ ÃÖ°í ´Ş¼º½Ã ³ë¶õ»ö, ±âº»Àº ³²»ö)
+            // ìƒ‰ìƒ ê²°ì • (ê°œì¸ ìµœê³  ë‹¬ì„±ì‹œ ë…¸ë€ìƒ‰, ê¸°ë³¸ì€ ë‚¨ìƒ‰)
             Color targetColor = isNewBest ? colorBest : colorNormal;
 
             if (normalBestScoreText != null)
@@ -194,7 +239,7 @@ public class GameStateManager : MonoBehaviour
         }
     }
 
-    // ÆĞ³Î È°¼ºÈ­/ºñÈ°¼ºÈ­ ¹× CanvasGroup »óÅÂ Á¦¾î ÇïÆÛ ÇÔ¼ö
+    // íŒ¨ë„ í™œì„±í™”/ë¹„í™œì„±í™” ë° CanvasGroup ìƒíƒœ ì œì–´ í—¬í¼ í•¨ìˆ˜
     private void SetPanelState(CanvasGroup canvasGroup, bool isActive)
     {
         if (canvasGroup != null)
@@ -211,7 +256,7 @@ public class GameStateManager : MonoBehaviour
         UpdateSlotUI();
     }
 
-    // --- ¹öÆ° OnClick Àü¿ë ·¡ÆÛ ÇÔ¼ö (¸Å°³º¯¼ö 0°³) ---
+    // --- ë²„íŠ¼ OnClick ì „ìš© ë˜í¼ í•¨ìˆ˜ (ë§¤ê°œë³€ìˆ˜ 0ê°œ) ---
     public void OnClickSlot0Up() { OnClickSlotArrow(0, 1); }
     public void OnClickSlot0Down() { OnClickSlotArrow(0, -1); }
 
@@ -232,10 +277,10 @@ public class GameStateManager : MonoBehaviour
 
     public void OnClickSubmit()
     {
-        // 1. Á¦Ãâ UI ºñÈ°¼ºÈ­
+        // 1. ì œì¶œ UI ë¹„í™œì„±í™”
         SetHallOfFameInteractable(false);
 
-        // 2. ÀÌ´Ï¼È ¹®ÀÚ¿­ »ı¼º
+        // 2. ì´ë‹ˆì…œ ë¬¸ìì—´ ìƒì„±
         string initial = "AAA";
         if (slotTexts != null && slotTexts.Length >= 3 &&
             slotTexts[0] != null && slotTexts[1] != null && slotTexts[2] != null)
@@ -243,29 +288,29 @@ public class GameStateManager : MonoBehaviour
             initial = $"{slotTexts[0].text}{slotTexts[1].text}{slotTexts[2].text}";
         }
 
-        // 3. ¼­¹ö Á¡¼ö Àü¼Û
+        // 3. ì„œë²„ ì ìˆ˜ ì „ì†¡
         if (NetworkManager.Instance != null)
         {
             StartCoroutine(NetworkManager.Instance.PostScore(gameIndex.ToString(), initial, currentScore, (success) => {
                 if (success)
                 {
-                    Debug.Log("¼­¹ö ÃÖ°í±â·Ï ¼Û½Å ¿Ï·á");
+                    Debug.Log("ì„œë²„ ìµœê³ ê¸°ë¡ ì†¡ì‹  ì™„ë£Œ");
                 }
                 else
                 {
-                    Debug.LogWarning("¼­¹ö Àü¼Û ½ÇÆĞ ¶Ç´Â Å¸ÀÓ¾Æ¿ô");
+                    Debug.LogWarning("ì„œë²„ ì „ì†¡ ì‹¤íŒ¨ ë˜ëŠ” íƒ€ì„ì•„ì›ƒ");
                 }
             }));
         }
         else
         {
-            Debug.LogWarning("[GameStateManager] NetworkManager°¡ ¾À¿¡ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+            Debug.LogWarning("[GameStateManager] NetworkManagerê°€ ì”¬ì— ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
         }
     }
 
     private void SetHallOfFameInteractable(bool isEnteringInitial)
     {
-        // ÀÌ´Ï¼È ÀÔ·Â °ü·Ã ¹öÆ° »óÅÂ º¯°æ
+        // ì´ë‹ˆì…œ ì…ë ¥ ê´€ë ¨ ë²„íŠ¼ ìƒíƒœ ë³€ê²½
         if (submitButton != null) submitButton.interactable = isEnteringInitial;
 
         for (int i = 0; i < 3; i++)
@@ -274,11 +319,11 @@ public class GameStateManager : MonoBehaviour
             if (slotDownButtons[i] != null) slotDownButtons[i].interactable = isEnteringInitial;
         }
 
-        // ³×ºñ°ÔÀÌ¼Ç ¹öÆ° »óÅÂ º¯°æ (Á¦Ãâ ¿Ï·á Àü¿£ ºñÈ°¼ºÈ­, Á¦Ãâ ¿Ï·á ÈÄ È°¼ºÈ­)
+        // ë„¤ë¹„ê²Œì´ì…˜ ë²„íŠ¼ ìƒíƒœ ë³€ê²½ (ì œì¶œ ì™„ë£Œ ì „ì—” ë¹„í™œì„±í™”, ì œì¶œ ì™„ë£Œ í›„ í™œì„±í™”)
         if (hallOfFameRestartButton != null) hallOfFameRestartButton.interactable = !isEnteringInitial;
         if (hallOfFameHomeButton != null) hallOfFameHomeButton.interactable = !isEnteringInitial;
     }
 
-    public void OnClickRestart() { SceneManager.LoadScene(gameIndex.ToString()); }
-    public void OnClickHome() { SceneManager.LoadScene("GameSelectScene"); }
+    public void OnClickRestart() { SceneManager.LoadScene(SceneNames.Game(gameIndex)); }  // [ë³€ê²½] ì”¬ ì´ë¦„ â†’ SceneNames
+    public void OnClickHome() { SceneManager.LoadScene(SceneNames.GameSelect); }          // [ë³€ê²½] ì”¬ ì´ë¦„ â†’ SceneNames
 }

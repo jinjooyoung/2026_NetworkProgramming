@@ -1,15 +1,15 @@
 using UnityEngine;
 
-// 2¹ø °ÔÀÓ: ½º¿ÍÀÌÇÁ ½½¶óÀÌ½º ÀÚ¸£±â °¨Áö¿ë °úÀÏ ½ºÅ©¸³Æ®
+// 2ë²ˆ ê²Œì„: ìŠ¤ì™€ì´í”„ ìŠ¬ë¼ì´ìŠ¤ ìë¥´ê¸° ê°ì§€ìš© ê³¼ì¼ ìŠ¤í¬ë¦½íŠ¸
 public class FruitObject : MonoBehaviour
 {
     public FruitDataSO fruitData;
     public SpriteRenderer spriteRenderer;
     public CircleCollider2D circleCollider;
 
-    [Header("ÀÌÆåÆ® ¼³Á¤")]
-    public SliceEffect sliceEffectPrefab;   // º£´Â ¼± ÀÌÆåÆ® ÇÁ¸®ÆÕ
-    public GameObject juiceSplashPrefab;    // ÃÒ¾Ç »Ñ·ÁÁö´Â/¿øÇü ÆÄÆ¼Å¬ ÇÁ¸®ÆÕ
+    [Header("ì´í™íŠ¸ ì„¤ì •")]
+    public SliceEffect sliceEffectPrefab;   // ë² ëŠ” ì„  ì´í™íŠ¸ í”„ë¦¬íŒ¹
+    public GameObject juiceSplashPrefab;    // ì´¤ì•… ë¿Œë ¤ì§€ëŠ”/ì›í˜• íŒŒí‹°í´ í”„ë¦¬íŒ¹
 
     private void Awake()
     {
@@ -24,7 +24,7 @@ public class FruitObject : MonoBehaviour
         {
             spriteRenderer.sprite = so.fruitSprite;
 
-            // PPU¿¡ µû¸¥ CircleCollider2D ¹İÁö¸§(Radius) ÀÚµ¿ °è»ê
+            // PPUì— ë”°ë¥¸ CircleCollider2D ë°˜ì§€ë¦„(Radius) ìë™ ê³„ì‚°
             AdjustColliderRadius(so.fruitSprite.pixelsPerUnit);
         }
     }
@@ -33,11 +33,11 @@ public class FruitObject : MonoBehaviour
     {
         if (circleCollider == null) return;
 
-        // [¼±Çü º¸Á¤ °ø½Ä] PPU 40 -> 0.8 / PPU 140 -> 0.3
+        // [ì„ í˜• ë³´ì • ê³µì‹] PPU 40 -> 0.8 / PPU 140 -> 0.3
         // Radius = 1.0 - (PPU * 0.005)
         float targetRadius = 1.0f - (ppu * 0.005f);
 
-        // ¸¸¾à PPU ¹üÀ§°¡ ¹ş¾î³ª´õ¶óµµ ¾ÈÀüÇÏµµ·Ï ÃÖ¼Ò/ÃÖ´ë ¹üÀ§ Á¦ÇÑ (Clamp)
+        // ë§Œì•½ PPU ë²”ìœ„ê°€ ë²—ì–´ë‚˜ë”ë¼ë„ ì•ˆì „í•˜ë„ë¡ ìµœì†Œ/ìµœëŒ€ ë²”ìœ„ ì œí•œ (Clamp)
         circleCollider.radius = Mathf.Clamp(targetRadius, 0.2f, 1.0f);
     }
 
@@ -47,32 +47,34 @@ public class FruitObject : MonoBehaviour
 
         Vector3 currentPos = transform.position;
 
-        // 1. ½ä¸° À§Ä¡¿¡ ½½¶óÀÌ½º ¼± ÀÌÆåÆ® »ı¼º
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX(SFXType.FruitSlice); // [ì‹ ê·œ] ì´¥
+
+        // 1. ì°ë¦° ìœ„ì¹˜ì— ìŠ¬ë¼ì´ìŠ¤ ì„  ì´í™íŠ¸ ìƒì„±
         if (sliceEffectPrefab != null)
         {
-            float randomAngle = Random.Range(-45f, 45f); // ½ä¸®´Â ´ë°¢¼± °¢µµ
+            float randomAngle = Random.Range(-45f, 45f); // ì°ë¦¬ëŠ” ëŒ€ê°ì„  ê°ë„
             var fx = Instantiate(sliceEffectPrefab, currentPos, Quaternion.identity);
             fx.PlayEffect(currentPos, randomAngle);
         }
 
-        // 2. ÃÒ¾Ç »Ñ·ÁÁö´Â ÆÄÆ¼Å¬ ÀÌÆåÆ® »ı¼º (XÃà 90µµ È¸Àü Àû¿ë)
+        // 2. ì´¤ì•… ë¿Œë ¤ì§€ëŠ” íŒŒí‹°í´ ì´í™íŠ¸ ìƒì„± (Xì¶• 90ë„ íšŒì „ ì ìš©)
         if (juiceSplashPrefab != null)
         {
             //Quaternion splashRotation = Quaternion.Euler(90f, 0f, 0f);
             GameObject splashFx = Instantiate(juiceSplashPrefab, currentPos, Quaternion.identity);
-            //Destroy(splashFx, 2.0f); // 2ÃÊ µÚ ÀÚµ¿ »èÁ¦
+            //Destroy(splashFx, 2.0f); // 2ì´ˆ ë’¤ ìë™ ì‚­ì œ
         }
 
-        // 3. Á¡¼ö ¹× ÆøÅº Ã³¸®
+        // 3. ì ìˆ˜ ë° í­íƒ„ ì²˜ë¦¬
         if (fruitData.isBomb)
         {
-            // ÆøÅºÀ» ½ä¾úÀ» ¶§: -30Á¡ ¹× ¸ñ¼û 1 Â÷°¨
+            // í­íƒ„ì„ ì°ì—ˆì„ ë•Œ: -30ì  ë° ëª©ìˆ¨ 1 ì°¨ê°
             GameStateManager.Instance.AddScore(-30);
             GameStateManager.Instance.ReduceLife(1);
         }
         else
         {
-            // °úÀÏÀ» ½ä¾úÀ» ¶§: +SO¿¡ ¼³Á¤µÈ Á¡¼ö
+            // ê³¼ì¼ì„ ì°ì—ˆì„ ë•Œ: +SOì— ì„¤ì •ëœ ì ìˆ˜
             GameStateManager.Instance.AddScore(fruitData.score);
         }
 

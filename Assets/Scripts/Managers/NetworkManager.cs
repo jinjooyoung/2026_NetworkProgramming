@@ -102,7 +102,7 @@ public class NetworkManager : MonoBehaviour
                     EncryptedPayload payload = JsonUtility.FromJson<EncryptedPayload>(www.downloadHandler.text);
                     string json = Decrypt(payload.data);
 
-                    // JSON Å°°ª ¸ÅÇÎ Ã³¸® ("0" -> "game1")
+                    // JSON í‚¤ê°’ ë§¤í•‘ ì²˜ë¦¬ ("0" -> "game1")
                     json = json.Replace("\"0\":", "\"game1\":")
                                .Replace("\"1\":", "\"game2\":")
                                .Replace("\"2\":", "\"game3\":");
@@ -110,13 +110,13 @@ public class NetworkManager : MonoBehaviour
                     cachedLeaderboard = JsonUtility.FromJson<LeaderboardData>(json);
 
                     int len1 = cachedLeaderboard?.game1 != null ? cachedLeaderboard.game1.Length : 0;
-                    Debug.Log($"[GetLeaderboard ¼º°ø] Game1: {len1}°³ Ç×¸ñ Á¤»ó ÆÄ½ÌµÊ!");
+                    Debug.Log($"[GetLeaderboard ì„±ê³µ] Game1: {len1}ê°œ í•­ëª© ì •ìƒ íŒŒì‹±ë¨!");
 
                     onComplete?.Invoke(true);
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[GetLeaderboard ¿¹¿Ü ¹ß»ı] {ex.Message}");
+                    Debug.LogError($"[GetLeaderboard ì˜ˆì™¸ ë°œìƒ] {ex.Message}");
                     onComplete?.Invoke(false);
                 }
             }
@@ -158,19 +158,19 @@ public class NetworkManager : MonoBehaviour
                         yield break;
                     }
 
-                    // JSON Å°°ª ¸ÅÇÎ Ã³¸® ("0" -> "game1")
+                    // JSON í‚¤ê°’ ë§¤í•‘ ì²˜ë¦¬ ("0" -> "game1")
                     resJson = resJson.Replace("\"0\":", "\"game1\":")
                                      .Replace("\"1\":", "\"game2\":")
                                      .Replace("\"2\":", "\"game3\":");
 
                     cachedLeaderboard = JsonUtility.FromJson<LeaderboardData>(resJson);
-                    Debug.Log("[PostScore ¼º°ø] LeaderboardData Ä³½Ã Á¤»ó °»½Å ¿Ï·á!");
+                    Debug.Log("[PostScore ì„±ê³µ] LeaderboardData ìºì‹œ ì •ìƒ ê°±ì‹  ì™„ë£Œ!");
 
                     onComplete?.Invoke(true);
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[PostScore ½ÇÆĞ] JSON ÆÄ½Ì ¿¹¿Ü ¹ß»ı: {ex.Message}");
+                    Debug.LogError($"[PostScore ì‹¤íŒ¨] JSON íŒŒì‹± ì˜ˆì™¸ ë°œìƒ: {ex.Message}");
                     onComplete?.Invoke(false);
                 }
             }

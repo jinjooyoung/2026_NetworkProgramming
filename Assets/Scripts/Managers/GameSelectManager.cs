@@ -16,8 +16,8 @@ public class GameSelectManager : MonoBehaviour
 
     public void OnClickGameButton(int gameIndex)
     {
-        SceneManager.LoadScene(gameIndex.ToString());
+        SceneManager.LoadScene(SceneNames.Game(gameIndex)); // [변경] 씬 이름 → SceneNames
     }
 
-    public void OnClickMain() { SceneManager.LoadScene("MainLobbyScene"); }
+    public void OnClickMain() { SceneManager.LoadScene(SceneNames.MainLobby); } // [변경] 씬 이름 → SceneNames
 }

@@ -7,6 +7,13 @@ public class TrashObject : MonoBehaviour
     public SpriteRenderer spriteRenderer;
     private Vector3 originPos;
     private bool isDragging = false;
+    private Vector3 baseScale = Vector3.one; // [ì‹ ê·œ] ì§‘ê¸° ì—°ì¶œ ê¸°ì¤€ í¬ê¸°
+
+    // [ì‹ ê·œ]
+    private void Awake()
+    {
+        baseScale = transform.localScale;
+    }
 
     public void Setup(TrashDataSO so)
     {
@@ -17,16 +24,20 @@ public class TrashObject : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (!GameStateManager.Instance.isGameStarted) return;
+        // [ë³€ê²½] isGameStarted ì²´í¬ â†’ IsInputBlocked (ì¼ì‹œì •ì§€ ì¤‘ ë“œë˜ê·¸ ì‹œì‘ ì°¨ë‹¨)
+        if (GameStateManager.IsInputBlocked) return;
 
-        // µå·¡±× ½ÃÀÛ ½Ã ¿øÀ§Ä¡ ±â¾ï
+        // ë“œë˜ê·¸ ì‹œì‘ ì‹œ ì›ìœ„ì¹˜ ê¸°ì–µ
         originPos = transform.position;
         isDragging = true;
+
+        PlaySFX(SFXType.TrashPick); // [ì‹ ê·œ] ê¾¸ê¹ƒ
+        DOTweenManager.PunchBounce(transform, baseScale, 1f, 1.15f, 0.2f, false); // [ì‹ ê·œ] ì§‘ëŠ” ëŠë‚Œ
     }
 
     private void OnMouseDrag()
     {
-        if (!isDragging) return;
+        if (!isDragging || Time.timeScale <= 0f) return; // [ë³€ê²½] ì¼ì‹œì •ì§€ ì¤‘ì—ëŠ” ëŒë ¤ê°€ì§€ ì•ŠìŒ
         Vector3 mouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouse.z = originPos.z;
         transform.position = mouse;
@@ -37,43 +48,52 @@ public class TrashObject : MonoBehaviour
         if (!isDragging) return;
         isDragging = false;
 
-        // 1. ÀÚ±â ÀÚ½ÅÀÇ Äİ¶óÀÌ´õ¸¦ Àá½Ã ²û (Self-Hit ¹æÁö)
+        // 1. ìê¸° ìì‹ ì˜ ì½œë¼ì´ë”ë¥¼ ì ì‹œ ë” (Self-Hit ë°©ì§€)
         Collider myCollider = GetComponent<Collider>();
         if (myCollider != null) myCollider.enabled = false;
 
-        // 2. 3D È­¸é ÁöÁ¡ ¸¶¿ì½º ·¹ÀÌ ¹ß»ç
+        // 2. 3D í™”ë©´ ì§€ì  ë§ˆìš°ìŠ¤ ë ˆì´ ë°œì‚¬
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Debug.Log("3D ·¹ÀÌ ¹ß»ç");
+        Debug.Log("3D ë ˆì´ ë°œì‚¬");
 
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             SpaceZone zone = hit.collider.GetComponent<SpaceZone>();
 
-            // ½ºÆäÀÌ½ºÁ¸ ÄÄÆ÷³ÍÆ®°¡ Á¸ÀçÇÒ °æ¿ì
+            // ìŠ¤í˜ì´ìŠ¤ì¡´ ì»´í¬ë„ŒíŠ¸ê°€ ì¡´ì¬í•  ê²½ìš°
             if (zone != null)
             {
+                DOTweenManager.PunchBounce(zone.transform, Vector3.one, 1f, 1.15f, 0.2f, false);
+
                 bool isCorrect = (zone.spaceType == trashData.trashType);
 
-                // Á¡¼ö °¡°¨
+                // ì ìˆ˜ ê°€ê°
+                PlaySFX(SFXType.TrashDrop); // [ì‹ ê·œ] íƒ±ê·¸ë‘
                 GameStateManager.Instance.AddScore(isCorrect ? 50 : -30);
 
-                // ¸®¼Â ÁøÇà
+                // ë¦¬ì…‹ ì§„í–‰
                 var manager = FindFirstObjectByType<Game1_RecycleManager>();
                 if (manager != null)
                 {
                     manager.ResetTrashObject(this, originPos);
                 }
 
-                // Äİ¶óÀÌ´õ º¹±¸ ÈÄ ¸®ÅÏ
+                // ì½œë¼ì´ë” ë³µêµ¬ í›„ ë¦¬í„´
                 if (myCollider != null) myCollider.enabled = true;
                 return;
             }
         }
 
-        // 3. Äİ¶óÀÌ´õ ´Ù½Ã º¹±¸
+        // 3. ì½œë¼ì´ë” ë‹¤ì‹œ ë³µêµ¬
         if (myCollider != null) myCollider.enabled = true;
 
-        // ½ºÆäÀÌ½ºÁ¸ÀÌ ¾Æ´Ï°Å³ª °¨ÁöµÈ °ÍÀÌ ¾øÀ¸¸é ¿øÀ§Ä¡ º¹±Í
+        // ìŠ¤í˜ì´ìŠ¤ì¡´ì´ ì•„ë‹ˆê±°ë‚˜ ê°ì§€ëœ ê²ƒì´ ì—†ìœ¼ë©´ ì›ìœ„ì¹˜ ë³µê·€
         transform.position = originPos;
+    }
+
+    // [ì‹ ê·œ]
+    private void PlaySFX(SFXType type)
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX(type);
     }
 }

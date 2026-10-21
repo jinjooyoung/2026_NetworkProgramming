@@ -5,45 +5,45 @@ using TMPro;
 
 public class MainLobbyManager : MonoBehaviour
 {
-    [Header("ÅëÇÕ ÃÖ°íÁ¡¼ö UI (¼­¹ö ÀüÃ¼ 1À§)")]
+    [Header("í†µí•© ìµœê³ ì ìˆ˜ UI (ì„œë²„ ì „ì²´ 1ìœ„)")]
     public TextMeshProUGUI grandBestScoreText;
     public TextMeshProUGUI grandBestInitialText;
 
-    [Header("°¢ °ÔÀÓ 1~3À§ ·Ñ¸µ UI")]
+    [Header("ê° ê²Œì„ 1~3ìœ„ ë¡¤ë§ UI")]
     public TextMeshProUGUI currentGameTitleText;
     public TextMeshProUGUI rank1Text;
     public TextMeshProUGUI rank2Text;
     public TextMeshProUGUI rank3Text;
 
     private string[] gameIds = { "0", "1", "2" };
-    private string[] gameTitles = { "Ä«µå Â¦¸ÂÃß±â", "½ºÇÇµå ºĞ¸®¼ö°Å", "ÈÄ¸£Ã÷ ½½¶óÀÌ½º" };
+    private string[] gameTitles = { "ì¹´ë“œ ì§ë§ì¶”ê¸°", "ìŠ¤í”¼ë“œ ë¶„ë¦¬ìˆ˜ê±°", "í›„ë¥´ì¸  ìŠ¬ë¼ì´ìŠ¤" };
     private int currentIndex = 0;
 
     private void Start()
     {
-        Debug.Log("[MainLobbyManager] Start ½ÇÇàµÊ.");
+        Debug.Log("[MainLobbyManager] Start ì‹¤í–‰ë¨.");
 
-        // 1. ÀÌ¹Ì NetworkManager¿¡¼­ °¡Á®¿Â Ä³½Ã µ¥ÀÌÅÍ°¡ ÀÖ´Ù¸é Áï½Ã UI ¹İ¿µ
+        // 1. ì´ë¯¸ NetworkManagerì—ì„œ ê°€ì ¸ì˜¨ ìºì‹œ ë°ì´í„°ê°€ ìˆë‹¤ë©´ ì¦‰ì‹œ UI ë°˜ì˜
         if (NetworkManager.Instance != null && NetworkManager.Instance.cachedLeaderboard != null)
         {
-            Debug.Log("[MainLobbyManager] ±âÁ¸ Ä³½Ã µ¥ÀÌÅÍ°¡ Á¸ÀçÇÏ¿© Áï½Ã UI¸¦ ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.");
+            Debug.Log("[MainLobbyManager] ê¸°ì¡´ ìºì‹œ ë°ì´í„°ê°€ ì¡´ì¬í•˜ì—¬ ì¦‰ì‹œ UIë¥¼ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.");
             UpdateGrandBestUI();
             StartCoroutine(RotateRankRoutine());
         }
         else if (NetworkManager.Instance != null)
         {
-            Debug.Log("[MainLobbyManager] Ä³½Ã µ¥ÀÌÅÍ°¡ ¾ø¾î ¼­¹ö¿¡¼­ GetLeaderboard¸¦ »õ·Î ¿äÃ»ÇÕ´Ï´Ù.");
+            Debug.Log("[MainLobbyManager] ìºì‹œ ë°ì´í„°ê°€ ì—†ì–´ ì„œë²„ì—ì„œ GetLeaderboardë¥¼ ìƒˆë¡œ ìš”ì²­í•©ë‹ˆë‹¤.");
             StartCoroutine(NetworkManager.Instance.GetLeaderboard((success) => {
                 if (success)
                 {
-                    Debug.Log("[MainLobbyManager] GetLeaderboard ¼º°ø Äİ¹é ¼ö½Å. UI ¾÷µ¥ÀÌÆ® ÁøÇà.");
+                    Debug.Log("[MainLobbyManager] GetLeaderboard ì„±ê³µ ì½œë°± ìˆ˜ì‹ . UI ì—…ë°ì´íŠ¸ ì§„í–‰.");
                     UpdateGrandBestUI();
                     StopAllCoroutines();
                     StartCoroutine(RotateRankRoutine());
                 }
                 else
                 {
-                    Debug.LogWarning("[MainLobbyManager] GetLeaderboard ¿äÃ» ½ÇÆĞ.");
+                    Debug.LogWarning("[MainLobbyManager] GetLeaderboard ìš”ì²­ ì‹¤íŒ¨.");
                     if (grandBestScoreText != null) grandBestScoreText.text = "0";
                     if (grandBestInitialText != null) grandBestInitialText.text = "---";
                 }
@@ -51,31 +51,31 @@ public class MainLobbyManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[MainLobbyManager] NetworkManager.Instance°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("[MainLobbyManager] NetworkManager.Instanceê°€ nullì…ë‹ˆë‹¤!");
         }
     }
 
-    // [¼­¹ö ÀüÃ¼ ÃÖ°í ±â·Ï] ¼­¹öÀÇ ¸ğµç °ÔÀÓ 1~3À§ ±â·Ï Áß ÃÖ°íÁ¡¼ö¿Í ÀÌ´Ï¼È Ç¥½Ã
+    // [ì„œë²„ ì „ì²´ ìµœê³  ê¸°ë¡] ì„œë²„ì˜ ëª¨ë“  ê²Œì„ 1~3ìœ„ ê¸°ë¡ ì¤‘ ìµœê³ ì ìˆ˜ì™€ ì´ë‹ˆì…œ í‘œì‹œ
     private void UpdateGrandBestUI()
     {
         var lb = NetworkManager.Instance != null ? NetworkManager.Instance.cachedLeaderboard : null;
         if (lb == null)
         {
-            Debug.LogWarning("[UpdateGrandBestUI] cachedLeaderboard°¡ nullÀÌ¹Ç·Î UI ¾÷µ¥ÀÌÆ®¸¦ Ãë¼ÒÇÕ´Ï´Ù.");
+            Debug.LogWarning("[UpdateGrandBestUI] cachedLeaderboardê°€ nullì´ë¯€ë¡œ UI ì—…ë°ì´íŠ¸ë¥¼ ì·¨ì†Œí•©ë‹ˆë‹¤.");
             return;
         }
 
         int maxScore = -1;
         string bestName = "---";
 
-        // ¼­¹öÀÇ ¸ğµç °ÔÀÓ ¸®´õº¸µå µ¥ÀÌÅÍ ¼øÈ¸ (0¹ø, 1¹ø, 2¹ø °ÔÀÓ)
+        // ì„œë²„ì˜ ëª¨ë“  ê²Œì„ ë¦¬ë”ë³´ë“œ ë°ì´í„° ìˆœíšŒ (0ë²ˆ, 1ë²ˆ, 2ë²ˆ ê²Œì„)
         ScoreEntry[][] all = { lb.game1, lb.game2, lb.game3 };
         for (int i = 0; i < all.Length; i++)
         {
             var list = all[i];
             if (list != null && list.Length > 0)
             {
-                Debug.Log($"[UpdateGrandBestUI] Game {i} 1À§: Score={list[0].score}, Name={list[0].name}");
+                Debug.Log($"[UpdateGrandBestUI] Game {i} 1ìœ„: Score={list[0].score}, Name={list[0].name}");
                 if (list[0].score > maxScore)
                 {
                     maxScore = list[0].score;
@@ -84,13 +84,13 @@ public class MainLobbyManager : MonoBehaviour
             }
             else
             {
-                Debug.Log($"[UpdateGrandBestUI] Game {i} µ¥ÀÌÅÍ°¡ ºñ¾îÀÖ½À´Ï´Ù.");
+                Debug.Log($"[UpdateGrandBestUI] Game {i} ë°ì´í„°ê°€ ë¹„ì–´ìˆìŠµë‹ˆë‹¤.");
             }
         }
 
-        Debug.Log($"[UpdateGrandBestUI ÃÖÁ¾ ¼±ÅÃ °á°ú] ÃÖ°íÁ¡¼ö: {maxScore}, ÀÌ´Ï¼È: {bestName}");
+        Debug.Log($"[UpdateGrandBestUI ìµœì¢… ì„ íƒ ê²°ê³¼] ìµœê³ ì ìˆ˜: {maxScore}, ì´ë‹ˆì…œ: {bestName}");
 
-        // ÀüÃ¼ 1À§ Á¡¼ö ¹× ÇØ´ç ÀÛ¼ºÀÚ ÀÌ´Ï¼È UI ¹İ¿µ
+        // ì „ì²´ 1ìœ„ ì ìˆ˜ ë° í•´ë‹¹ ì‘ì„±ì ì´ë‹ˆì…œ UI ë°˜ì˜
         if (grandBestScoreText != null)
             grandBestScoreText.text = maxScore > -1 ? maxScore.ToString("#,##0") : "0";
 
@@ -115,7 +115,7 @@ public class MainLobbyManager : MonoBehaviour
         if (lb == null) return;
 
         ScoreEntry[] list = lb.GetListByGameId(id);
-        Debug.Log($"[DisplayRank] ID: {id}({title}) Ç×¸ñ °³¼ö: {(list != null ? list.Length : 0)}");
+        Debug.Log($"[DisplayRank] ID: {id}({title}) í•­ëª© ê°œìˆ˜: {(list != null ? list.Length : 0)}");
 
         if (rank1Text != null)
             rank1Text.text = (list != null && list.Length > 0) ? $"{list[0].score:#,##0}\n{list[0].name}" : "0\n---";
@@ -129,6 +129,6 @@ public class MainLobbyManager : MonoBehaviour
 
     public void OnClickStart()
     {
-        SceneManager.LoadScene("GameSelectScene");
+        SceneManager.LoadScene(SceneNames.GameSelect); // [ë³€ê²½] ì”¬ ì´ë¦„ â†’ SceneNames
     }
 }

@@ -6,25 +6,30 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
 
-    [Header("°ÔÀÓ »óÅÂ ¸Å´ÏÀú ÂüÁ¶")]
+    [Header("ê²Œì„ ìƒíƒœ ë§¤ë‹ˆì € ì°¸ì¡°")]
     public GameStateManager gameStateManager;
 
-    [Header("UI ÆĞ³Î ¿ÀºêÁ§Æ®")]
-    public GameObject timePanel;             // ½Ã°£ UI ÆĞ³Î
-    public GameObject lifePanel;             // »ı¸í UI ÆĞ³Î
+    [Header("UI íŒ¨ë„ ì˜¤ë¸Œì íŠ¸")]
+    public GameObject timePanel;             // ì‹œê°„ UI íŒ¨ë„
+    public GameObject lifePanel;             // ìƒëª… UI íŒ¨ë„
 
-    [Header("UI ¿ä¼Ò º¯¼ö")]
-    public TextMeshProUGUI timeText;         // ½Ã°£ Ç¥½Ã¿ë TMP (¾øÀ» ¼ö ÀÖÀ½)
-    public Image[] lifeImages;               // »ı¸í Ç¥½Ã¿ë ÀÌ¹ÌÁö ¹è¿­ (¾øÀ» ¼ö ÀÖÀ½)
-    public TextMeshProUGUI scoreText;        // Á¡¼ö Ç¥½Ã¿ë TMP
+    [Header("UI ìš”ì†Œ ë³€ìˆ˜")]
+    public TextMeshProUGUI timeText;         // ì‹œê°„ í‘œì‹œìš© TMP (ì—†ì„ ìˆ˜ ìˆìŒ)
+    public Image[] lifeImages;               // ìƒëª… í‘œì‹œìš© ì´ë¯¸ì§€ ë°°ì—´ (ì—†ì„ ìˆ˜ ìˆìŒ)
+    public TextMeshProUGUI scoreText;        // ì ìˆ˜ í‘œì‹œìš© TMP
 
-    // »ı¸í »ö»ó Á¤ÀÇ (#C6C5C5: È¸»ö / #F44336: »¡°£»ö)
+    // ìƒëª… ìƒ‰ìƒ ì •ì˜ (#C6C5C5: íšŒìƒ‰ / #F44336: ë¹¨ê°„ìƒ‰)
     private readonly Color colorGray = new Color32(0x70, 0x70, 0x6E, 0xFF);
     private readonly Color colorRed = new Color32(0xF4, 0x43, 0x36, 0xFF);
 
+    [Header("[ì‹ ê·œ] ì ìˆ˜ ë¡¤ë§ ì—°ì¶œ")]
+    public float scoreRollDuration = 0.35f;
+    private int displayedScore = 0;   // í˜„ì¬ í™”ë©´ì— í‘œì‹œ ì¤‘ì¸(ë¡¤ë§ ëª©í‘œ) ì ìˆ˜
+    private Vector3 scoreTextBaseScale = Vector3.one;
+
     private void Awake()
     {
-        // ¾À ÀüÈ¯ ½Ã ÆÄ±«µÇ´Â ´ÜÀÏ ¾À Àü¿ë ½Ì±ÛÅæ
+        // ì”¬ ì „í™˜ ì‹œ íŒŒê´´ë˜ëŠ” ë‹¨ì¼ ì”¬ ì „ìš© ì‹±ê¸€í†¤
         if (Instance == null)
         {
             Instance = this;
@@ -37,7 +42,9 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        // GameType¿¡ µû¶ó ÇØ´ç ÆĞ³Î¸¸ È°¼ºÈ­
+        if (scoreText != null) scoreTextBaseScale = scoreText.transform.localScale; // [ì‹ ê·œ]
+
+        // GameTypeì— ë”°ë¼ í•´ë‹¹ íŒ¨ë„ë§Œ í™œì„±í™”
         if (gameStateManager != null)
         {
             if (gameStateManager.gameType == GameType.TimeLimit)
@@ -52,7 +59,7 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        // ¾À ½ÃÀÛ ½Ã ÃÊ±â 1È¸ °»½Å
+        // ì”¬ ì‹œì‘ ì‹œ ì´ˆê¸° 1íšŒ ê°±ì‹ 
         UpdateTimeUI();
         UpdateScoreUI();
         UpdateLifeUI();
@@ -62,14 +69,14 @@ public class UIManager : MonoBehaviour
     {
         if (gameStateManager == null) return;
 
-        // °ÔÀÓ ½ÃÀÛµÊ & °ÔÀÓ ¿À¹ö ¾ÈµÊ »óÅÂÀÏ ¶§¸¸ UI Áö¼Ó ¾÷µ¥ÀÌÆ®
+        // ê²Œì„ ì‹œì‘ë¨ & ê²Œì„ ì˜¤ë²„ ì•ˆë¨ ìƒíƒœì¼ ë•Œë§Œ UI ì§€ì† ì—…ë°ì´íŠ¸
         if (gameStateManager.isGameStarted && !gameStateManager.isGameOver)
         {
             UpdateTimeUI();
         }
     }
 
-    // [½Ã°£ UI] ¿Ã¸² Ã³¸® ÈÄ ¹®ÀÚ¿­ º¯È¯
+    // [ì‹œê°„ UI] ì˜¬ë¦¼ ì²˜ë¦¬ í›„ ë¬¸ìì—´ ë³€í™˜
     private void UpdateTimeUI()
     {
         if (gameStateManager == null || gameStateManager.gameType != GameType.TimeLimit) return;
@@ -79,21 +86,31 @@ public class UIManager : MonoBehaviour
         timeText.text = displayTime.ToString();
     }
 
-    // [Á¡¼ö UI] 3ÀÚ¸®¸¶´Ù ÄÄ¸¶(,) Ç¥±â Ã³¸®
+    // [ì ìˆ˜ UI] 3ìë¦¬ë§ˆë‹¤ ì»´ë§ˆ(,) í‘œê¸° ì²˜ë¦¬
     public void UpdateScoreUI()
     {
         if (scoreText == null || gameStateManager == null) return;
 
-        scoreText.text = gameStateManager.currentScore.ToString("#,##0");
+        // [ë³€ê²½] ì¦‰ì‹œ í…ìŠ¤íŠ¸ êµì²´ â†’ ìˆ«ì ë¡¤ë§ + ë½€ì‰ ì—°ì¶œ
+        int targetScore = gameStateManager.currentScore;
+        if (targetScore == displayedScore)
+        {
+            scoreText.text = targetScore.ToString("#,##0");
+            return;
+        }
+
+        DOTweenManager.RollNumber(scoreText, displayedScore, targetScore, scoreRollDuration);
+        DOTweenManager.PunchBounce(scoreText.transform, scoreTextBaseScale, 1f, 1.2f, 0.25f);
+        displayedScore = targetScore;
     }
 
-    // [»ı¸í UI] Ã¼·Â °¨¼Ò ½Ã ¿ÜºÎ(GameStateManager)¿¡¼­ Á÷Á¢ È£Ãâ
+    // [ìƒëª… UI] ì²´ë ¥ ê°ì†Œ ì‹œ ì™¸ë¶€(GameStateManager)ì—ì„œ ì§ì ‘ í˜¸ì¶œ
     public void UpdateLifeUI()
     {
         if (gameStateManager == null || gameStateManager.gameType != GameType.LifeLimit) return;
         if (lifeImages == null || lifeImages.Length == 0) return;
 
-        // 1. ¸ğµç »ı¸í ÀÌ¹ÌÁö¸¦ È¸»ö(#C6C5C5)À¸·Î ÃÊ±âÈ­
+        // 1. ëª¨ë“  ìƒëª… ì´ë¯¸ì§€ë¥¼ íšŒìƒ‰(#C6C5C5)ìœ¼ë¡œ ì´ˆê¸°í™”
         for (int i = 0; i < lifeImages.Length; i++)
         {
             if (lifeImages[i] != null)
@@ -102,7 +119,7 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        // 2. ÇöÀç ³²Àº »ı¸í ¼ö¸¸Å­ »¡°£»ö(#F44336)À¸·Î º¯°æ
+        // 2. í˜„ì¬ ë‚¨ì€ ìƒëª… ìˆ˜ë§Œí¼ ë¹¨ê°„ìƒ‰(#F44336)ìœ¼ë¡œ ë³€ê²½
         int currentLife = Mathf.Clamp(gameStateManager.currentLife, 0, lifeImages.Length);
         for (int i = 0; i < currentLife; i++)
         {

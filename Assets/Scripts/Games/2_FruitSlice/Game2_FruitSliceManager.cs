@@ -2,24 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 2¹ø °ÔÀÓ: ÈÄ¸£Ã÷ ½½¶óÀÌ½º °ü¸®ÀÚ ¹× ½º¿ÍÀÌÇÁ °¨Áö
+// 2ë²ˆ ê²Œì„: í›„ë¥´ì¸  ìŠ¬ë¼ì´ìŠ¤ ê´€ë¦¬ì ë° ìŠ¤ì™€ì´í”„ ê°ì§€
 public class Game2_FruitSliceManager : MonoBehaviour
 {
-    [Header("SO ¼³Á¤")]
-    public List<FruitDataSO> allFruitSOs; // °úÀÏ µ¥ÀÌÅÍ SOµé¸¸ µî·Ï
-    public FruitDataSO bombSO;           // ÆøÅº Àü¿ë SO ´ÜÀÏ µî·Ï
+    [Header("SO ì„¤ì •")]
+    public List<FruitDataSO> allFruitSOs; // ê³¼ì¼ ë°ì´í„° SOë“¤ë§Œ ë“±ë¡
+    public FruitDataSO bombSO;           // í­íƒ„ ì „ìš© SO ë‹¨ì¼ ë“±ë¡
 
-    [Header("°úÀÏ ¿ÀºêÁ§Æ® Ç®")]
-    public List<FruitObject> fruitObjects; // 8°³
+    [Header("ê³¼ì¼ ì˜¤ë¸Œì íŠ¸ í’€")]
+    public List<FruitObject> fruitObjects; // 8ê°œ
 
-    [Header("½ºÆù À§Ä¡ ±âÁØ")]
+    [Header("ìŠ¤í° ìœ„ì¹˜ ê¸°ì¤€")]
     public Transform leftX;
     public Transform rightX;
     public Transform topY;
     public Transform bottomY;
 
     private Vector2 swipeStart;
-    private int fruitSpawnStack = 0; // °úÀÏ »ı¼º ½ºÅÃ Ä«¿îÅÍ
+    private bool isSwiping = false; // [ì‹ ê·œ] ì¼ì‹œì •ì§€ ì „ì— ì‹œì‘ëœ ìŠ¤ì™€ì´í”„ê°€ ì¬ê°œ í›„ íŒì •ë˜ì§€ ì•Šë„ë¡
+    private int fruitSpawnStack = 0; // ê³¼ì¼ ìƒì„± ìŠ¤íƒ ì¹´ìš´í„°
 
     private void Start()
     {
@@ -47,12 +48,12 @@ public class Game2_FruitSliceManager : MonoBehaviour
 
     private void SpawnFruit(FruitObject fruit)
     {
-        // 1. ½ºÅÃ Áõ°¡
+        // 1. ìŠ¤íƒ ì¦ê°€
         fruitSpawnStack++;
 
         FruitDataSO selectedSO = null;
 
-        // 2. ½ºÅÃÀÌ 5°¡ µÇ¸é ÆøÅº »ı¼º ÈÄ ½ºÅÃ ¸®¼Â
+        // 2. ìŠ¤íƒì´ 5ê°€ ë˜ë©´ í­íƒ„ ìƒì„± í›„ ìŠ¤íƒ ë¦¬ì…‹
         if (fruitSpawnStack >= 5 && bombSO != null)
         {
             selectedSO = bombSO;
@@ -60,7 +61,7 @@ public class Game2_FruitSliceManager : MonoBehaviour
         }
         else
         {
-            // °úÀÏ µ¥ÀÌÅÍ SO ¸ñ·Ï¿¡¼­ ·£´ı ÃßÃâ
+            // ê³¼ì¼ ë°ì´í„° SO ëª©ë¡ì—ì„œ ëœë¤ ì¶”ì¶œ
             if (allFruitSOs != null && allFruitSOs.Count > 0)
             {
                 selectedSO = allFruitSOs[Random.Range(0, allFruitSOs.Count)];
@@ -69,10 +70,10 @@ public class Game2_FruitSliceManager : MonoBehaviour
 
         if (selectedSO == null) return;
 
-        // 3. SO µ¥ÀÌÅÍ ¼¼ÆÃ
+        // 3. SO ë°ì´í„° ì„¸íŒ…
         fruit.Setup(selectedSO);
 
-        // 4. ½ºÆù À§Ä¡ ¹× ¹°¸® Èû Àû¿ë
+        // 4. ìŠ¤í° ìœ„ì¹˜ ë° ë¬¼ë¦¬ í˜ ì ìš©
         bool isLeft = Random.value > 0.5f;
         float spawnX = isLeft ? leftX.position.x : rightX.position.x;
         float spawnY = Random.Range(bottomY.position.y, topY.position.y);
@@ -88,15 +89,19 @@ public class Game2_FruitSliceManager : MonoBehaviour
                                       : new Vector2(Random.Range(-4f, -2f), Random.Range(4.5f, 6.5f));
             rb.AddForce(forceDir, ForceMode2D.Impulse);
         }
+
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX(SFXType.FruitWhoosh); // [ì‹ ê·œ] íœ™
     }
 
     private void Update()
     {
-        if (!GameStateManager.Instance.isGameStarted) return;
+        // [ë³€ê²½] isGameStarted ì²´í¬ â†’ IsInputBlocked (ì„¤ì • íŒì—…/íŠœí† ë¦¬ì–¼ë¡œ ì¼ì‹œì •ì§€ ì¤‘ ì…ë ¥ ì°¨ë‹¨)
+        if (GameStateManager.IsInputBlocked) { isSwiping = false; return; }
 
-        if (Input.GetMouseButtonDown(0)) swipeStart = Input.mousePosition;
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonDown(0)) { swipeStart = Input.mousePosition; isSwiping = true; } // [ë³€ê²½] isSwiping ê¸°ë¡
+        if (Input.GetMouseButtonUp(0) && isSwiping)                                              // [ë³€ê²½] && isSwiping
         {
+            isSwiping = false;
             Vector2 swipeEnd = Input.mousePosition;
             if (Vector2.Distance(swipeStart, swipeEnd) > 30f)
             {
