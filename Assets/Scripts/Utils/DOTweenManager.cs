@@ -22,6 +22,7 @@ public static class DOTweenManager
     private const string ID_AUDIO = "_audio";
     private const string ID_ROLL = "_roll";
     private const string ID_GROUP = "_group";
+    private const string ID_PITCH = "_pitch";
 
     private static string MakeId(Object target, string suffix) => target.GetInstanceID() + suffix;
 
@@ -265,6 +266,23 @@ public static class DOTweenManager
     public static Tween AudioFadeOut(AudioSource source, float duration = 0.5f)
     {
         return FadeAudio(source, 0f, duration, true);
+    }
+
+    /// <summary>
+    /// AudioSource의 피치(재생 속도 + 음높이)를 목표값으로 변경합니다. duration 0이면 즉시 적용.
+    /// </summary>
+    public static Tween PitchAudio(AudioSource source, float toPitch, float duration = 0.5f, bool ignoreTimeScale = true)
+    {
+        if (source == null) return null;
+        string tweenId = MakeId(source, ID_PITCH);
+        DOTween.Kill(tweenId);
+
+        if (duration <= 0f) { source.pitch = toPitch; return null; }
+
+        return source.DOPitch(toPitch, duration)
+            .SetId(tweenId)
+            .SetUpdate(ignoreTimeScale)
+            .SetLink(source.gameObject);
     }
 
     #endregion

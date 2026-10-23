@@ -9,9 +9,8 @@ public enum BGMType
     None = -1,
     MainLobby = 0,      // 메인 화면
     GameSelect = 1,     // 게임 선택 화면
-    InGame = 2,         // 게임 진행 중
-    InGameHurry = 3,    // 게임 진행 중 (10초 남음 / 마지막 목숨)
-    Result = 4,         // 게임 종료 후 스코어 화면
+    InGame = 2,         // 게임 진행 중 (위기 시 피치 상승)
+    Result = 3,         // 게임 종료 후 스코어 화면
 }
 
 /// <summary>
@@ -27,6 +26,7 @@ public enum SFXType
     TrashDrop = 5,      // [1] 쓰레기 넣기 (탱그랑)
     FruitWhoosh = 6,    // [2] 과일 날아오기 (휙)
     FruitSlice = 7,     // [2] 과일 썰기 (촥)
+    Whistle = 8,        // 게임 시작 및 종료 시 호루라기
 }
 
 /// <summary>
@@ -39,10 +39,10 @@ public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance { get; private set; }
 
-    [Header("BGM 클립 (0 메인 / 1 게임선택 / 2 게임중 / 3 게임중-10초 / 4 결과)")]
+    [Header("BGM 클립 (0 메인 / 1 게임선택 / 2 게임중 / 3 결과)")]
     [SerializeField] private List<AudioClip> bgmClips = new List<AudioClip>();
 
-    [Header("SFX 클립 (0 버튼 / 1 점수+ / 2 점수- / 3 카드 / 4 쓰레기집기 / 5 쓰레기넣기 / 6 과일휙 / 7 과일촥)")]
+    [Header("SFX 클립 (0 버튼 / 1 점수+ / 2 점수- / 3 카드 / 4 쓰레기집기 / 5 쓰레기넣기 / 6 과일휙 / 7 과일촥 / 8 호루라기)")]
     [SerializeField] private List<AudioClip> sfxClips = new List<AudioClip>();
 
     [Header("볼륨")]
@@ -113,6 +113,7 @@ public class SoundManager : MonoBehaviour
 
         AudioSource currentSource = isUsingSourceA ? bgmSourceA : bgmSourceB;
         AudioSource newSource = isUsingSourceA ? bgmSourceB : bgmSourceA;
+        DOTweenManager.PitchAudio(newSource, 1f, 0f); // 새 BGM은 항상 원래 속도로 시작
         isUsingSourceA = !isUsingSourceA;
 
         newSource.Stop();
@@ -134,6 +135,15 @@ public class SoundManager : MonoBehaviour
         CurrentBGM = BGMType.None;
         DOTweenManager.AudioFadeOut(bgmSourceA, fadeDuration);
         DOTweenManager.AudioFadeOut(bgmSourceB, fadeDuration);
+    }
+
+    /// <summary>
+    /// 현재 재생 중인 BGM의 피치(속도 + 음높이)를 변경합니다.
+    /// </summary>
+    public void SetBGMPitch(float pitch, float duration = 0.5f)
+    {
+        AudioSource activeSource = isUsingSourceA ? bgmSourceA : bgmSourceB;
+        DOTweenManager.PitchAudio(activeSource, pitch, duration);
     }
 
     #endregion

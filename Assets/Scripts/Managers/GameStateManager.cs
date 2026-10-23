@@ -101,6 +101,7 @@ public class GameStateManager : MonoBehaviour
         }
         if (countdownPanel != null) countdownPanel.SetActive(false);
         isGameStarted = true;
+        PlaySFX(SFXType.Whistle); // 시작 호루라기
     }
 
     private void Update()
@@ -170,6 +171,7 @@ public class GameStateManager : MonoBehaviour
     private IEnumerator GameOverSequence()
     {
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
+        PlaySFX(SFXType.Whistle); // 종료 호루라기
         yield return new WaitForSeconds(1f);
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
 
