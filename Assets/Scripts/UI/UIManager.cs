@@ -12,9 +12,11 @@ public class UIManager : MonoBehaviour
     [Header("UI 패널 오브젝트")]
     public GameObject timePanel;             // 시간 UI 패널
     public GameObject lifePanel;             // 생명 UI 패널
+    public GameObject timeSliderOBJ;         // 시간 슬라이더
 
     [Header("UI 요소 변수")]
     public TextMeshProUGUI timeText;         // 시간 표시용 TMP (없을 수 있음)
+    public TimeSlider timeSlider;            // 시간 슬라이더
     public Image[] lifeImages;               // 생명 표시용 이미지 배열 (없을 수 있음)
     public TextMeshProUGUI scoreText;        // 점수 표시용 TMP
 
@@ -51,18 +53,21 @@ public class UIManager : MonoBehaviour
             {
                 if (lifePanel != null) lifePanel.SetActive(false);
                 if (timePanel != null) timePanel.SetActive(true);
+                if (timeSliderOBJ != null) timeSliderOBJ.SetActive(true);
             }
             else if (gameStateManager.gameType == GameType.LifeLimit)
             {
                 if (timePanel != null) timePanel.SetActive(false);
                 if (lifePanel != null) lifePanel.SetActive(true);
+                if (timeSliderOBJ != null) timeSliderOBJ.SetActive(false);
             }
         }
 
         // 씬 시작 시 초기 1회 갱신
-        UpdateTimeUI();
+        timeText.text = Mathf.CeilToInt(gameStateManager.currentTime).ToString();
         UpdateScoreUI();
         UpdateLifeUI();
+        timeSlider.SetUpSlider(gameStateManager.timeLimit);
     }
 
     private void Update()
@@ -84,6 +89,7 @@ public class UIManager : MonoBehaviour
 
         int displayTime = Mathf.CeilToInt(gameStateManager.currentTime);
         timeText.text = displayTime.ToString();
+        timeSlider.UpdateSlider(gameStateManager.currentTime);
     }
 
     // [점수 UI] 3자리마다 컴마(,) 표기 처리
