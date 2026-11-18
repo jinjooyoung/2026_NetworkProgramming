@@ -183,14 +183,20 @@ public class GameStateManager : MonoBehaviour
         if (scorePanel != null) scorePanel.SetActive(true);
         SetPanelState(scorePanelCanvasGroup, true);
 
-        int localBest = PlayerPrefs.GetInt($"BestScore{gameIndex}", 0);
-        int rank3Cutoff = NetworkManager.Instance != null ? NetworkManager.Instance.GetCutoffScore(gameIndex.ToString()) : 0;
+        // [변경] NetworkManager(Render) → ScoreSaver(Firebase)
+        ScoreSaver saver = ScoreSaver.Instance;
+        int serverBest = saver != null ? saver.GetMyServerBest(gameIndex) : 0;                      // 내 서버 기록
+        int localBest = Mathf.Max(PlayerPrefs.GetInt($"BestScore{gameIndex}", 0), serverBest);    // 다른 기기 기록 포함
+        int rank3Cutoff = saver != null ? saver.GetCutoffScore(gameIndex.ToString()) : 0;
+        bool canSave = saver != null && AuthManager.IsLoggedIn;   // 로그인해야 서버 저장 가능
+        bool isServerNewBest = currentScore > serverBest;         // 서버의 내 칸을 갱신하는 점수인가
 
         if (panelNormal != null) panelNormal.SetActive(false);
         if (panelHallOfFame != null) panelHallOfFame.SetActive(false);
 
         // TOP 3 랭킹 달성 여부 체크
-        if (currentScore > rank3Cutoff)
+        // [변경] 사용자당 한 칸이므로, 내 서버 기록보다도 높아야 랭킹이 바뀜 + 로그인 상태여야 저장 가능
+        if (canSave && isServerNewBest && currentScore > rank3Cutoff)
         {
             // 1. 랭킹점수화면 (명예의 전당 패널)
             if (panelHallOfFame != null) panelHallOfFame.SetActive(true);
@@ -208,10 +214,15 @@ public class GameStateManager : MonoBehaviour
                 PlayerPrefs.Save();
             }
 
+            LoadSavedInitials(); // [신규] 지난번에 입력한 이니셜을 기본값으로
             UpdateSlotUI();
         }
         else
         {
+            // [신규] TOP3는 아니지만 서버의 내 기록보다 높으면 조용히 저장 (이니셜은 지난번 값)
+            if (canSave && isServerNewBest && currentScore > 0)
+                saver.Save(gameIndex, PlayerPrefs.GetString(INITIALS_KEY, "???"), currentScore);
+
             // 2. 일반점수화면 (일반 또는 개인최고 패널)
             if (panelNormal != null) panelNormal.SetActive(true);
 
@@ -249,6 +260,20 @@ public class GameStateManager : MonoBehaviour
             canvasGroup.alpha = isActive ? 1f : 0f;
             canvasGroup.blocksRaycasts = isActive;
             canvasGroup.interactable = isActive;
+        }
+    }
+
+    // [신규] 마지막으로 입력한 이니셜 저장/불러오기
+    private const string INITIALS_KEY = "PlayerInitials";
+
+    private void LoadSavedInitials()
+    {
+        string saved = PlayerPrefs.GetString(INITIALS_KEY, "");
+        if (saved.Length != 3) return;
+        for (int i = 0; i < 3; i++)
+        {
+            int idx = saved[i] - 'A';
+            if (idx >= 0 && idx < 26) slotIndices[i] = idx;
         }
     }
 
@@ -290,23 +315,21 @@ public class GameStateManager : MonoBehaviour
             initial = $"{slotTexts[0].text}{slotTexts[1].text}{slotTexts[2].text}";
         }
 
-        // 3. 서버 점수 전송
-        if (NetworkManager.Instance != null)
+        PlayerPrefs.SetString(INITIALS_KEY, initial); // [신규] 다음 입력의 기본값
+        PlayerPrefs.Save();
+
+        // 3. [변경] Firebase 에 점수 저장 (수업 실습 7 : 읽어서 비교 → 더 높을 때만 PUT)
+        if (ScoreSaver.Instance != null)
         {
-            StartCoroutine(NetworkManager.Instance.PostScore(gameIndex.ToString(), initial, currentScore, (success) => {
-                if (success)
-                {
-                    Debug.Log("서버 최고기록 송신 완료");
-                }
-                else
-                {
-                    Debug.LogWarning("서버 전송 실패 또는 타임아웃");
-                }
-            }));
+            ScoreSaver.Instance.Save(gameIndex, initial, currentScore, success =>
+            {
+                if (success) Debug.Log("서버 최고기록 저장 완료");
+                else Debug.LogWarning("서버 저장 실패 (로그인 상태·DB 주소·규칙 확인)");
+            });
         }
         else
         {
-            Debug.LogWarning("[GameStateManager] NetworkManager가 씬에 존재하지 않습니다.");
+            Debug.LogWarning("[GameStateManager] ScoreSaver가 없습니다. (로비부터 실행해야 생성됨)");
         }
     }
 

@@ -15,50 +15,70 @@ public class MainLobbyManager : MonoBehaviour
     public TextMeshProUGUI rank2Text;
     public TextMeshProUGUI rank3Text;
 
+    [Header("[신규] 로그인 사용자 표시 (수업 MenuUI 역할)")]
+    public GameObject userInfoRoot;          // 이름 + 로그아웃 버튼 묶음
+    public TextMeshProUGUI userNameText;     // "손님 Kq8wZ2"
+
     private string[] gameIds = { "0", "1", "2" };
     private string[] gameTitles = { "카드 짝맞추기", "스피드 분리수거", "후르츠 슬라이스" };
     private int currentIndex = 0;
 
     private void Start()
     {
-        Debug.Log("[MainLobbyManager] Start 실행됨.");
+        // [신규] 로그인 사용자 표시 (수업 MenuUI.Start)
+        if (userInfoRoot != null) userInfoRoot.SetActive(AuthManager.IsLoggedIn);
+        if (userNameText != null) userNameText.text = AuthManager.Name;
 
-        // 1. 이미 NetworkManager에서 가져온 캐시 데이터가 있다면 즉시 UI 반영
-        if (NetworkManager.Instance != null && NetworkManager.Instance.cachedLeaderboard != null)
+        // [변경] NetworkManager(Render 서버) → ScoreSaver(Firebase)
+        ScoreSaver saver = ScoreSaver.Instance;
+        if (saver == null)
         {
-            Debug.Log("[MainLobbyManager] 기존 캐시 데이터가 존재하여 즉시 UI를 업데이트합니다.");
+            Debug.LogError("[MainLobbyManager] ScoreSaver.Instance가 null입니다!");
+            return;
+        }
+
+        // 1. 캐시가 있으면 즉시 표시 (게임에서 돌아왔을 때 빈 화면 방지)
+        bool hadCache = saver.cachedLeaderboard != null;
+        if (hadCache)
+        {
             UpdateGrandBestUI();
             StartCoroutine(RotateRankRoutine());
         }
-        else if (NetworkManager.Instance != null)
+
+        // 2. 항상 서버에서 최신 랭킹을 다시 받아 갱신
+        saver.FetchLeaderboard(success =>
         {
-            Debug.Log("[MainLobbyManager] 캐시 데이터가 없어 서버에서 GetLeaderboard를 새로 요청합니다.");
-            StartCoroutine(NetworkManager.Instance.GetLeaderboard((success) => {
-                if (success)
-                {
-                    Debug.Log("[MainLobbyManager] GetLeaderboard 성공 콜백 수신. UI 업데이트 진행.");
-                    UpdateGrandBestUI();
-                    StopAllCoroutines();
-                    StartCoroutine(RotateRankRoutine());
-                }
-                else
-                {
-                    Debug.LogWarning("[MainLobbyManager] GetLeaderboard 요청 실패.");
-                    if (grandBestScoreText != null) grandBestScoreText.text = "0";
-                    if (grandBestInitialText != null) grandBestInitialText.text = "---";
-                }
-            }));
-        }
-        else
-        {
-            Debug.LogError("[MainLobbyManager] NetworkManager.Instance가 null입니다!");
-        }
+            if (this == null) return; // 응답 전에 씬이 바뀐 경우
+            if (success)
+            {
+                UpdateGrandBestUI();
+                StopAllCoroutines();
+                StartCoroutine(RotateRankRoutine());
+            }
+            else if (!hadCache) // 실패했고 보여줄 캐시도 없을 때만 기본값
+            {
+                Debug.LogWarning("[MainLobbyManager] 랭킹 요청 실패.");
+                if (grandBestScoreText != null) grandBestScoreText.text = "0";
+                if (grandBestInitialText != null) grandBestInitialText.text = "---";
+            }
+        });
+
+        // 3. 로그인했다면 내 서버 기록도 받아 둠 (다른 기기 기록 동기화 + 명예의 전당 판정용)
+        if (AuthManager.IsLoggedIn) saver.FetchMyBests();
+    }
+
+    /// <summary>
+    /// [신규] 로그아웃 버튼 OnClick (수업 MenuUI.Logout)
+    /// </summary>
+    public void OnClickLogout()
+    {
+        AuthManager.Logout();
     }
 
     // [서버 전체 최고 기록] 서버의 모든 게임 1~3위 기록 중 최고점수와 이니셜 표시
     private void UpdateGrandBestUI()
     {
-        var lb = NetworkManager.Instance != null ? NetworkManager.Instance.cachedLeaderboard : null;
+        var lb = ScoreSaver.Instance != null ? ScoreSaver.Instance.cachedLeaderboard : null; // [변경]
         if (lb == null)
         {
             Debug.LogWarning("[UpdateGrandBestUI] cachedLeaderboard가 null이므로 UI 업데이트를 취소합니다.");
@@ -69,10 +89,9 @@ public class MainLobbyManager : MonoBehaviour
         string bestName = "---";
 
         // 서버의 모든 게임 리더보드 데이터 순회 (0번, 1번, 2번 게임)
-        ScoreEntry[][] all = { lb.game1, lb.game2, lb.game3 };
-        for (int i = 0; i < all.Length; i++)
+        for (int i = 0; i < lb.Count; i++) // [변경] game1~3 고정 필드 → 게임 개수만큼
         {
-            var list = all[i];
+            var list = lb.GetList(i);
             if (list != null && list.Length > 0)
             {
                 Debug.Log($"[UpdateGrandBestUI] Game {i} 1위: Score={list[0].score}, Name={list[0].name}");
@@ -111,7 +130,7 @@ public class MainLobbyManager : MonoBehaviour
     private void DisplayRank(string id, string title)
     {
         if (currentGameTitleText != null) currentGameTitleText.text = title;
-        var lb = NetworkManager.Instance != null ? NetworkManager.Instance.cachedLeaderboard : null;
+        var lb = ScoreSaver.Instance != null ? ScoreSaver.Instance.cachedLeaderboard : null; // [변경]
         if (lb == null) return;
 
         ScoreEntry[] list = lb.GetListByGameId(id);
