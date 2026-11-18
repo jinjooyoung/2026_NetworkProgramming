@@ -2487,7 +2487,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: v0.4.0
+  m_text: v0.5.0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9306944abfa09174aa17a522b113e978, type: 2}
   m_sharedMaterial: {fileID: 272829896134742973, guid: 9306944abfa09174aa17a522b113e978, type: 2}
@@ -3283,6 +3283,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 945919329}
     m_Modifications:
+    - target: {fileID: 141670506535924311, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 4068705091865072114}
+    - target: {fileID: 141670506535924311, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Logout
+      objectReference: {fileID: 0}
+    - target: {fileID: 141670506535924311, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: AuthManager, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 533299936556101795, guid: 24364f8393b6df64aa7cd5a05a3848c1, type: 3}
       propertyPath: m_Name
       value: SettingPopup
